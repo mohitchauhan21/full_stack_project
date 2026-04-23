@@ -4,6 +4,21 @@ const { protect } = require('../middleware/auth');
 const Log = require('../models/Log');
 const Medicine = require('../models/Medicine');
 
+// @route    GET api/logs/patient/:userId
+// @desc     Get all logs for a specific patient
+// @access   Private (Doctor/Caregiver)
+router.get('/patient/:userId', protect, async (req, res) => {
+    try {
+        const logs = await Log.find({ user: req.params.userId })
+            .populate('medicine', 'name dosage time')
+            .sort({ date: -1 });
+        res.json(logs);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 // @route    GET api/logs/stats/:userId
 // @desc     Get log stats for last 7 days
 // @access   Private

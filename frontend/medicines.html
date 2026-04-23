@@ -1,57 +1,109 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Medicines - MedRemind</title>
+    <title>Medication Management - MedRemind Lumina</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="css/style.css">
     <script>
         tailwind.config = {
             theme: {
                 extend: {
-                    colors: { primary: '#0ea5e9', secondary: '#10b981' },
+                    colors: { primary: '#0ea5e9', secondary: '#10b981', danger: '#ef4444' },
                     fontFamily: { display: ['Outfit', 'sans-serif'] }
                 }
             }
         }
     </script>
 </head>
-<body class="bg-slate-50 text-slate-900 min-h-screen pb-20 font-['Inter']">
-    <div class="max-w-4xl mx-auto p-4 md:p-8">
-        <header class="flex justify-between items-center mb-8">
-            <h1 class="text-3xl font-display font-bold">My Medicines</h1>
-            <button id="add-medicine-btn" class="bg-primary text-white px-6 py-3 rounded-2xl font-bold shadow-lg shadow-sky-100 flex items-center gap-2">
-                <i data-lucide="plus"></i> Add New
-            </button>
-        </header>
 
-        <div class="bg-white rounded-[2.5rem] shadow-sm border border-slate-100 overflow-hidden">
-            <div id="medicine-list" class="divide-y divide-slate-50">
-                <div class="p-8 text-center text-slate-400">Loading medicines...</div>
+<body>
+    <div id="med-management-app" class="animate-slide-up">
+        <div class="mb-10">
+            <h2 class="text-3xl font-display font-bold text-slate-800">Medication Management</h2>
+            <p class="text-slate-400 font-medium mt-1">Add, update, and manage your schedules</p>
+        </div>
+
+        <div class="grid grid-cols-12 gap-8">
+            <!-- Full Width Medication Entry -->
+            <div class="col-span-12">
+                <div class="card-white p-12">
+                    <div class="flex items-center gap-6 mb-12 pb-8 border-b border-slate-50">
+                        <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
+                            <i data-lucide="plus" class="w-10 h-10"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-3xl font-display font-bold text-slate-800">Medication Entry</h3>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-[0.2em] mt-2">Define Clinical Schedule & Reminders</p>
+                        </div>
+                    </div>
+
+                    <form id="add-med-form" class="space-y-10 max-w-5xl mx-auto">
+                        <div id="patient-select-container" class="hidden">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Assign to Patient</label>
+                            <select id="assign-patient" class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                                <option value="">Select a patient...</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Medication Name</label>
+                            <input type="text" id="med-name" placeholder="e.g. Metformin" required
+                                class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Schedule Details</label>
+                            <div class="flex gap-4 mb-6">
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">M</button>
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">T</button>
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">W</button>
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">T</button>
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">F</button>
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">S</button>
+                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">S</button>
+                            </div>
+                            <input type="text" id="med-time" placeholder="08:00 AM" required
+                                class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-8">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Dosage</label>
+                                <input type="text" id="med-dosage" placeholder="500mg" 
+                                    class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Frequency</label>
+                                <select id="med-frequency" class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                                    <option value="Daily">Daily</option>
+                                    <option value="Weekly">Weekly</option>
+                                    <option value="As Needed">As Needed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="pt-6">
+                            <button type="submit" 
+                                class="w-full py-6 bg-primary text-white text-xl font-bold rounded-[2rem] shadow-xl shadow-sky-100 hover:scale-[1.01] active:scale-[0.99] transition-all">
+                                Confirm Clinical Schedule
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Mobile Navigation -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-100 flex justify-around p-3 md:hidden z-50">
-        <a href="dashboard.html" class="flex flex-col items-center text-slate-400">
-            <i data-lucide="home" class="w-6 h-6"></i>
-            <span class="text-[10px] mt-1">Home</span>
-        </a>
-        <a href="medicines.html" class="flex flex-col items-center text-primary">
-            <i data-lucide="pill" class="w-6 h-6"></i>
-            <span class="text-[10px] mt-1 font-bold">Meds</span>
-        </a>
-        <a href="history.html" class="flex flex-col items-center text-slate-400">
-            <i data-lucide="history" class="w-6 h-6"></i>
-            <span class="text-[10px] mt-1">History</span>
-        </a>
-    </nav>
-
     <script src="js/api.js"></script>
+    <script src="js/layout.js"></script>
     <script src="js/medicines.js"></script>
-    <script>lucide.createIcons();</script>
 </body>
+
 </html>

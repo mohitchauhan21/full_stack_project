@@ -18,6 +18,7 @@ app.use('/api/auth', require('./routes/auth'));
 app.use('/api/medicines', require('./routes/medicines'));
 app.use('/api/logs', require('./routes/logs'));
 app.use('/api/users', require('./routes/users'));
+app.use('/api/vitals', require('./routes/vitals'));
 
 // Serve static files from frontend folder
 app.use(express.static(path.join(__dirname, '../frontend')));

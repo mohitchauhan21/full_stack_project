@@ -6,6 +6,7 @@ const MedicineSchema = new mongoose.Schema({
     dosage: { type: String },
     time: { type: String, required: true },
     frequency: { type: String },
+    status: { type: String, enum: ['active', 'on hold', 'completed'], default: 'active' },
     date: { type: Date, default: Date.now }
 });
 
