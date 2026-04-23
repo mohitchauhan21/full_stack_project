@@ -132,7 +132,7 @@ async function renderPatientView() {
         ]);
 
         const todayLogs = logs.filter(log => new Date(log.date).toDateString() === now.toDateString());
-        
+
         // Task 7: Sort by proximity to current time
         const timeToMinutes = (t) => {
             const [time, modifier] = t.split(' ');
@@ -377,7 +377,7 @@ async function renderCaregiverView(container) {
     try {
         const patients = await apiFetch('/users/my-patients');
         document.getElementById('caretaker-patient-count').textContent = patients.length;
-        
+
         const patientData = await Promise.all(patients.map(async p => {
             const [stats, logs] = await Promise.all([
                 apiFetch(`/logs/stats/${p._id}`),
@@ -386,7 +386,7 @@ async function renderCaregiverView(container) {
             const avg = stats.length > 0 ? Math.round(stats.reduce((acc, s) => acc + s.percentage, 0) / stats.length) : 0;
             const lastLog = logs[0];
             const missedToday = logs.some(l => l.status === 'skipped' && new Date(l.date).toDateString() === new Date().toDateString());
-            
+
             return { ...p, adherence: avg, lastLog, missedToday };
         }));
 
@@ -420,7 +420,7 @@ async function renderCaregiverView(container) {
                         
                         <div class="flex items-center gap-3 text-xs">
                             <i data-lucide="clock" class="w-4 h-4 text-slate-300"></i>
-                            <span class="text-slate-500">Last activity: <span class="text-slate-800 font-bold">${p.lastLog ? new Date(p.lastLog.date).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'None'}</span></span>
+                            <span class="text-slate-500">Last activity: <span class="text-slate-800 font-bold">${p.lastLog ? new Date(p.lastLog.date).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'None'}</span></span>
                         </div>
                     </div>
 
@@ -560,7 +560,7 @@ async function renderDoctorView(container) {
     try {
         const patients = await apiFetch('/users/patients');
         document.getElementById('doc-patient-count').textContent = patients.length;
-        
+
         const patientData = await Promise.all(patients.map(async p => {
             const [stats, logs] = await Promise.all([
                 apiFetch(`/logs/stats/${p._id}`),
@@ -568,7 +568,7 @@ async function renderDoctorView(container) {
             ]);
             const avg = stats.length > 0 ? Math.round(stats.reduce((acc, s) => acc + s.percentage, 0) / stats.length) : 0;
             const lastMissed = logs.find(l => l.status === 'skipped');
-            
+
             // Task 18: Risk Level Logic
             let risk = 'Low';
             let riskColor = 'text-emerald-500 bg-emerald-50';
@@ -624,7 +624,7 @@ async function renderDoctorView(container) {
             if (p.adherence < 60) alerts.push({ patient: p, type: 'Adherence', msg: `${p.name} adherence dropped below 60% (${p.adherence}%)` });
             const missedCount = p.logs.filter(l => l.status === 'skipped' && (new Date() - new Date(l.date)) < 3 * 24 * 60 * 60 * 1000).length;
             if (missedCount >= 3) alerts.push({ patient: p, type: 'Missed Doses', msg: `${p.name} missed ${missedCount} doses in the last 3 days` });
-            
+
             // Task 20: Inactive for 2 days
             const lastLog = p.logs[0];
             if (lastLog && (new Date() - new Date(lastLog.date)) > 2 * 24 * 60 * 60 * 1000) {
@@ -655,9 +655,9 @@ async function renderDoctorView(container) {
 }
 
 // Explicitly expose to window to ensure HTML onclick can find it
-window.viewPatientFile = async function(patientId, patientName) {
+window.viewPatientFile = async function (patientId, patientName) {
     console.log('Viewing patient file:', patientId, patientName);
-    
+
     // Show loading overlay
     const overlay = document.createElement('div');
     overlay.className = 'fixed inset-0 bg-slate-900/60 backdrop-blur-md z-[100] flex items-center justify-center p-4 animate-fade-in';
@@ -778,7 +778,7 @@ window.viewPatientFile = async function(patientId, patientName) {
     }
 }
 
-window.linkPatient = async function() {
+window.linkPatient = async function () {
     const email = prompt('Enter patient email:');
     if (email) {
         try {
@@ -788,14 +788,14 @@ window.linkPatient = async function() {
     }
 }
 
-window.addNewPrescription = async function() {
+window.addNewPrescription = async function () {
     // Create Modal Overlay
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-[100] flex items-center justify-center p-4 animate-fade-in';
     modal.id = 'prescription-modal';
 
     const patients = await apiFetch('/users/patients');
-    
+
     modal.innerHTML = `
         <div class="bg-white rounded-3xl w-full max-w-lg shadow-2xl overflow-hidden animate-slide-up">
             <div class="p-8 border-b border-slate-50 flex items-center justify-between">
@@ -866,7 +866,7 @@ window.addNewPrescription = async function() {
     });
 }
 
-window.logMed = async function(id, status) {
+window.logMed = async function (id, status) {
     try {
         await apiFetch('/logs', { method: 'POST', body: JSON.stringify({ medicineId: id, status }) });
         initDashboard();
