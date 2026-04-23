@@ -65,4 +65,27 @@ router.post('/link-patient', protect, async (req, res) => {
     }
 });
 
+// @route    PUT api/users/profile
+// @desc     Update logged-in user's profile (name, age)
+// @access   Private
+router.put('/profile', protect, async (req, res) => {
+    try {
+        const { name, age } = req.body;
+        const updateFields = {};
+        if (name) updateFields.name = name.trim();
+        if (age) updateFields.age = parseInt(age);
+
+        const user = await User.findByIdAndUpdate(
+            req.user.id,
+            { $set: updateFields },
+            { new: true }
+        ).select('-password');
+
+        res.json(user);
+    } catch (err) {
+        console.error(err.message);
+        res.status(500).send('Server error');
+    }
+});
+
 module.exports = router;

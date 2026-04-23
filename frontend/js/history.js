@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', loadHistory);
 async function loadHistory() {
     const user = JSON.parse(localStorage.getItem('user'));
     const historyList = document.getElementById('history-list');
-    
+
     // Task 14: Loading State
     historyList.innerHTML = `
         <tr>
@@ -85,11 +85,11 @@ async function loadHistory() {
             const dateObj = new Date(log.date);
             const dateStr = dateObj.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
             const timeStr = dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            
+
             const isTaken = log.status === 'taken';
             const row = document.createElement('tr');
             row.className = 'hover:bg-slate-50/50 transition-all group';
-            
+
             row.innerHTML = `
                 <td class="px-8 py-6">
                     <div class="flex flex-col">
@@ -146,7 +146,7 @@ async function exportHistory() {
             return;
         }
 
-        const csvContent = "data:text/csv;charset=utf-8," 
+        const csvContent = "data:text/csv;charset=utf-8,"
             + "Date,Time,Medicine,Status,Method\n"
             + logs.map(l => {
                 const d = new Date(l.date);

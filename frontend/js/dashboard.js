@@ -46,38 +46,6 @@ async function renderPatientContainer(container) {
                     <div id="med-schedule" class="space-y-4"></div>
                 </section>
 
-                <section>
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-2xl font-display font-bold text-slate-800">Vital Signs</h3>
-                        <button onclick="logVitals()" class="text-sm font-bold text-primary hover:underline uppercase tracking-wider">New Entry</button>
-                    </div>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div class="card-white flex items-center gap-6 p-6">
-                            <div class="w-14 h-14 rounded-2xl bg-rose-50 flex items-center justify-center text-rose-500">
-                                <i data-lucide="heart" class="w-8 h-8"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Heart Rate</p>
-                                <div class="flex items-baseline gap-2">
-                                    <span id="heart-rate-val" class="text-3xl font-display font-bold text-slate-800">--</span>
-                                    <span class="text-sm font-bold text-slate-400 uppercase">BPM</span>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="card-white flex items-center gap-6 p-6">
-                            <div class="w-14 h-14 rounded-2xl bg-sky-50 flex items-center justify-center text-sky-500">
-                                <i data-lucide="droplet" class="w-8 h-8"></i>
-                            </div>
-                            <div>
-                                <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">Blood Pressure</p>
-                                <div class="flex items-baseline gap-2">
-                                    <span id="bp-val" class="text-3xl font-display font-bold text-slate-800">--/--</span>
-                                    <span class="text-sm font-bold text-slate-400 uppercase">mmHg</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
             </div>
 
             <!-- Task 9: Weekly Progress Section -->
@@ -124,11 +92,10 @@ async function renderPatientView() {
     if (nameEl) nameEl.textContent = user.name.split(' ')[0];
 
     try {
-        const [meds, logs, stats, vitals] = await Promise.all([
+        const [meds, logs, stats] = await Promise.all([
             apiFetch('/medicines'),
             apiFetch('/logs'),
-            apiFetch(`/logs/stats/${user.id || user._id}`),
-            apiFetch('/vitals')
+            apiFetch(`/logs/stats/${user.id || user._id}`)
         ]);
 
         const todayLogs = logs.filter(log => new Date(log.date).toDateString() === now.toDateString());
@@ -271,13 +238,6 @@ async function renderPatientView() {
                 `;
             }
         }
-
-        // Vitals
-        const latestVitals = vitals[0] || { heartRate: '--', bloodPressure: { systolic: '--', diastolic: '--' } };
-        const hrEl = document.getElementById('heart-rate-val');
-        const bpEl = document.getElementById('bp-val');
-        if (hrEl) hrEl.textContent = latestVitals.heartRate || '--';
-        if (bpEl) bpEl.textContent = latestVitals.bloodPressure ? `${latestVitals.bloodPressure.systolic}/${latestVitals.bloodPressure.diastolic}` : '--/--';
 
         lucide.createIcons();
     } catch (err) { console.error('Patient view error:', err); }

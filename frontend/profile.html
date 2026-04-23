@@ -34,7 +34,7 @@
                         <div class="w-32 h-32 rounded-[2.5rem] bg-primary/10 border-4 border-white shadow-xl overflow-hidden p-1">
                             <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Avatar" class="w-full h-full rounded-[2rem] object-cover">
                         </div>
-                        <button class="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-white rounded-xl shadow-lg border-4 border-white flex items-center justify-center hover:scale-110 transition-all">
+                        <button id="camera-btn" class="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-white rounded-xl shadow-lg border-4 border-white flex items-center justify-center hover:scale-110 transition-all" title="Change avatar">
                             <i data-lucide="camera" class="w-5 h-5"></i>
                         </button>
                     </div>
@@ -65,7 +65,7 @@
                 <div class="card-white">
                     <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-50">
                         <h4 class="text-xl font-display font-bold text-slate-800">Personal Information</h4>
-                        <button class="text-primary font-bold text-sm uppercase tracking-widest hover:underline">Edit Details</button>
+                        <button id="edit-details-btn" class="text-primary font-bold text-sm uppercase tracking-widest hover:underline">Edit Details</button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -98,6 +98,29 @@
                     <div id="role-info" class="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
                         <!-- Role specific info injected here -->
                     </div>
+                </div>
+            </div>
+
+            <!-- Edit Details Form (hidden by default) -->
+            <div id="edit-details-form" class="col-span-12 lg:col-span-8 hidden">
+                <div class="card-white">
+                    <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-50">
+                        <h4 class="text-xl font-display font-bold text-slate-800">Edit Information</h4>
+                        <button id="cancel-edit-btn" class="text-slate-400 font-bold text-sm uppercase tracking-widest hover:underline">Cancel</button>
+                    </div>
+                    <form id="update-profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Full Name</label>
+                            <input type="text" id="edit-name" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Age</label>
+                            <input type="number" id="edit-age" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                        </div>
+                        <div class="md:col-span-2">
+                            <button type="submit" class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.02] active:scale-[0.98] transition-all">Save Changes</button>
+                        </div>
+                    </form>
                 </div>
             </div>
         </div>
@@ -144,6 +167,61 @@
                     `;
                 }
                 lucide.createIcons();
+
+                // Load live medicine count
+                try {
+                    const meds = await apiFetch('/medicines');
+                    const activeMeds = meds.filter(m => (m.status || 'active') === 'active');
+                    document.getElementById('display-med-count').textContent = `${activeMeds.length} Active`;
+                } catch(e) { /* keep placeholder */ }
+
+                // Logout button
+                document.getElementById('logout-btn')?.addEventListener('click', () => {
+                    localStorage.clear();
+                    window.location.href = 'index.html';
+                });
+
+                // Camera button
+                document.getElementById('camera-btn')?.addEventListener('click', () => {
+                    alert('Avatar is auto-generated from your name. Custom uploads coming soon!');
+                });
+
+                // Edit Details toggle
+                const infoPanel = document.querySelector('.col-span-12.lg\\:col-span-8.space-y-8');
+                document.getElementById('edit-details-btn')?.addEventListener('click', () => {
+                    infoPanel?.classList.add('hidden');
+                    document.getElementById('edit-details-form')?.classList.remove('hidden');
+                    document.getElementById('edit-name').value = user.name || '';
+                    document.getElementById('edit-age').value = user.age || '';
+                });
+
+                document.getElementById('cancel-edit-btn')?.addEventListener('click', () => {
+                    infoPanel?.classList.remove('hidden');
+                    document.getElementById('edit-details-form')?.classList.add('hidden');
+                });
+
+                document.getElementById('update-profile-form')?.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const btn = e.target.querySelector('button[type="submit"]');
+                    btn.disabled = true;
+                    btn.textContent = 'Saving...';
+                    const name = document.getElementById('edit-name').value.trim();
+                    const age = document.getElementById('edit-age').value;
+                    try {
+                        await apiFetch('/users/profile', {
+                            method: 'PUT',
+                            body: JSON.stringify({ name, age })
+                        });
+                        const updatedUser = { ...user, name, age };
+                        localStorage.setItem('user', JSON.stringify(updatedUser));
+                        alert('Profile updated successfully!');
+                        window.location.reload();
+                    } catch(err) {
+                        alert('Failed to update profile. Please try again.');
+                        btn.disabled = false;
+                        btn.textContent = 'Save Changes';
+                    }
+                });
             }
         });
     </script>

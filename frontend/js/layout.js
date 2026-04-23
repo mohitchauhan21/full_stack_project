@@ -13,7 +13,9 @@ const renderSidebar = () => {
             links.push({ href: 'medicines.html', label: 'Medication', icon: 'pill', id: 'medicines' });
         }
 
-        links.push({ href: 'history.html', label: 'History', icon: 'activity', id: 'history' });
+        if (role !== 'doctor') {
+            links.push({ href: 'history.html', label: 'History', icon: 'activity', id: 'history' });
+        }
         links.push({ href: 'profile.html', label: 'My Profile', icon: 'user', id: 'profile' });
 
         return links;
