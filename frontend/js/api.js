@@ -22,5 +22,11 @@ const apiFetch = async (endpoint, options = {}) => {
         return;
     }
 
-    return response.json();
+    const data = await response.json();
+
+    if (!response.ok) {
+        throw new Error(data.msg || `Request failed with status ${response.status}`);
+    }
+
+    return data;
 };

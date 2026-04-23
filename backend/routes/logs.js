@@ -91,6 +91,22 @@ router.post('/', protect, async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
+        // ── Duplicate prevention: one log per medicine per day ──
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const existing = await Log.findOne({
+            user: req.user.id,
+            medicine: medicineId,
+            date: { $gte: startOfDay, $lte: endOfDay }
+        });
+
+        if (existing) {
+            return res.status(400).json({ msg: 'Already logged for today' });
+        }
+
         const newLog = new Log({
             user: req.user.id,
             medicine: medicineId,
@@ -98,8 +114,6 @@ router.post('/', protect, async (req, res) => {
         });
 
         const log = await newLog.save();
-
-        // Populate medicine details before returning
         await log.populate('medicine', 'name dosage time');
 
         res.status(201).json(log);

@@ -66,14 +66,21 @@ router.get('/:id', protect, async (req, res) => {
 // @access   Private
 router.post('/', protect, async (req, res) => {
     try {
-        const { name, dosage, time, frequency } = req.body;
+        const { name, dosage, time, frequency, user: targetUserId } = req.body;
 
         if (!name || !time) {
             return res.status(400).json({ msg: 'Name and time are required' });
         }
 
+        // Doctors can assign to a patient; everyone else assigns to themselves
+        const requestingUser = await User.findById(req.user.id);
+        let assignToUser = req.user.id;
+        if (requestingUser.role === 'doctor' && targetUserId) {
+            assignToUser = targetUserId;
+        }
+
         const newMedicine = new Medicine({
-            user: req.user.id,
+            user: assignToUser,
             name,
             dosage: dosage || '',
             time,

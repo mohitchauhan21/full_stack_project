@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medication Management - MedRemind Lumina</title>
+    <title>Medication Management - MedRemind</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/style.css">
     <script>
@@ -22,80 +19,112 @@
         }
     </script>
 </head>
-
 <body>
     <div id="med-management-app" class="animate-slide-up">
         <div class="mb-10">
             <h2 class="text-3xl font-display font-bold text-slate-800">Medication Management</h2>
-            <p class="text-slate-400 font-medium mt-1">Add, update, and manage your schedules</p>
+            <p class="text-slate-400 font-medium mt-1">Create, view, edit and delete medication schedules</p>
         </div>
 
         <div class="grid grid-cols-12 gap-8">
-            <!-- Full Width Medication Entry -->
-            <div class="col-span-12">
-                <div class="card-white p-12">
-                    <div class="flex items-center gap-6 mb-12 pb-8 border-b border-slate-50">
-                        <div class="w-20 h-20 rounded-3xl bg-primary/10 flex items-center justify-center text-primary shadow-sm">
-                            <i data-lucide="plus" class="w-10 h-10"></i>
+
+            <!-- LEFT: Add / Edit Form -->
+            <div class="col-span-12 lg:col-span-5">
+                <div class="card-white p-8 sticky top-8">
+                    <div class="flex items-center gap-4 mb-8 pb-6 border-b border-slate-50">
+                        <div id="form-icon" class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                            <i data-lucide="plus" class="w-7 h-7"></i>
                         </div>
                         <div>
-                            <h3 class="text-3xl font-display font-bold text-slate-800">Medication Entry</h3>
-                            <p class="text-xs text-slate-400 font-bold uppercase tracking-[0.2em] mt-2">Define Clinical Schedule & Reminders</p>
+                            <h3 id="form-title" class="text-2xl font-display font-bold text-slate-800">Add Medication</h3>
+                            <p class="text-xs text-slate-400 font-bold uppercase tracking-widest mt-1">Define Schedule & Reminders</p>
                         </div>
                     </div>
 
-                    <form id="add-med-form" class="space-y-10 max-w-5xl mx-auto">
+                    <form id="add-med-form" class="space-y-6">
+                        <!-- Hidden: edit mode ID -->
+                        <input type="hidden" id="edit-med-id">
+
+                        <!-- Doctor only: assign to patient -->
                         <div id="patient-select-container" class="hidden">
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Assign to Patient</label>
-                            <select id="assign-patient" class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Assign to Patient</label>
+                            <select id="assign-patient" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
                                 <option value="">Select a patient...</option>
                             </select>
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Medication Name</label>
-                            <input type="text" id="med-name" placeholder="e.g. Metformin" required
-                                class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Medication Name *</label>
+                            <input type="text" id="med-name" placeholder="e.g. Metformin 500mg" required
+                                class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
                         </div>
 
                         <div>
-                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Schedule Details</label>
-                            <div class="flex gap-4 mb-6">
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">M</button>
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">T</button>
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">W</button>
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">T</button>
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">F</button>
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">S</button>
-                                <button type="button" class="flex-1 py-4 rounded-2xl border border-slate-100 text-sm font-bold transition-all bg-slate-50 text-slate-400 hover:border-primary hover:text-primary">S</button>
-                            </div>
-                            <input type="text" id="med-time" placeholder="08:00 AM" required
-                                class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Dosage</label>
+                            <input type="text" id="med-dosage" placeholder="e.g. 500mg, 2 tablets"
+                                class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
                         </div>
 
-                        <div class="grid grid-cols-2 gap-8">
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Dosage</label>
-                                <input type="text" id="med-dosage" placeholder="500mg" 
-                                    class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
-                            </div>
-                            <div>
-                                <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Frequency</label>
-                                <select id="med-frequency" class="w-full px-8 py-5 bg-slate-50 border border-slate-100 rounded-[2rem] outline-none focus:ring-4 focus:ring-primary/10 transition-all text-lg font-medium">
-                                    <option value="Daily">Daily</option>
-                                    <option value="Weekly">Weekly</option>
-                                    <option value="As Needed">As Needed</option>
-                                </select>
-                            </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Time *</label>
+                            <input type="time" id="med-time" required
+                                class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
                         </div>
 
-                        <div class="pt-6">
-                            <button type="submit" 
-                                class="w-full py-6 bg-primary text-white text-xl font-bold rounded-[2rem] shadow-xl shadow-sky-100 hover:scale-[1.01] active:scale-[0.99] transition-all">
-                                Confirm Clinical Schedule
+                        <div>
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Frequency</label>
+                            <select id="med-frequency" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
+                                <option value="Daily">Daily</option>
+                                <option value="Twice Daily">Twice Daily</option>
+                                <option value="Weekly">Weekly</option>
+                                <option value="As Needed">As Needed</option>
+                            </select>
+                        </div>
+
+                        <!-- Status — only shown in edit mode -->
+                        <div id="status-container" class="hidden">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Status</label>
+                            <select id="med-status" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
+                                <option value="active">Active</option>
+                                <option value="on hold">On Hold</option>
+                                <option value="completed">Completed</option>
+                            </select>
+                        </div>
+
+                        <div class="flex gap-3 pt-2">
+                            <button type="submit" id="submit-btn"
+                                class="flex-1 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2">
+                                <i data-lucide="plus" class="w-5 h-5"></i>
+                                Add Medication
+                            </button>
+                            <button type="button" id="cancel-edit-btn" onclick="cancelEdit()"
+                                class="hidden px-6 py-4 bg-slate-100 text-slate-600 font-bold rounded-2xl hover:bg-slate-200 transition-all">
+                                Cancel
                             </button>
                         </div>
                     </form>
+                </div>
+            </div>
+
+            <!-- RIGHT: Medicine List -->
+            <div class="col-span-12 lg:col-span-7">
+                <!-- Filter Tabs -->
+                <div class="flex gap-2 mb-6">
+                    <button onclick="setFilter('active')" id="filter-active"
+                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white transition-all">Active</button>
+                    <button onclick="setFilter('on hold')" id="filter-onhold"
+                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-400 border border-slate-100 hover:border-primary/30 transition-all">On Hold</button>
+                    <button onclick="setFilter('completed')" id="filter-completed"
+                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-400 border border-slate-100 hover:border-primary/30 transition-all">Completed</button>
+                    <button onclick="setFilter('all')" id="filter-all"
+                        class="px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-400 border border-slate-100 hover:border-primary/30 transition-all">All</button>
+                </div>
+
+                <!-- Medicine Cards -->
+                <div id="medicine-list" class="space-y-4">
+                    <div class="flex items-center justify-center py-20">
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -105,5 +134,4 @@
     <script src="js/layout.js"></script>
     <script src="js/medicines.js"></script>
 </body>
-
 </html>

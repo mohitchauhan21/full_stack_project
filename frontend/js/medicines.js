@@ -1,257 +1,365 @@
-const medicineList = document.getElementById('medicine-list');
-const addMedForm = document.getElementById('add-med-form');
-let currentFilter = 'active';
+// ─── State ───────────────────────────────────────────────────────────────────
+let currentFilter  = 'active';
+let editingId      = null;
+let medicineList   = null;
+let addMedForm     = null;
 
-document.addEventListener('DOMContentLoaded', () => {
+// ─── Init ────────────────────────────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', async () => {
     const user = JSON.parse(localStorage.getItem('user'));
+    if (!user) { window.location.href = 'index.html'; return; }
+
+    // Query DOM elements AFTER DOM is ready
+    medicineList = document.getElementById('medicine-list');
+    addMedForm   = document.getElementById('add-med-form');
+
     if (user.role === 'doctor') {
-        initDoctorMode();
+        await initDoctorMode();
     }
+
+    // Wire form submit
+    addMedForm?.addEventListener('submit', handleFormSubmit);
+
     loadMedicines();
-    renderAdherenceGauge();
-    initDaySelectors();
-    initFilters();
-    syncProfileAvatar();
 });
 
+// ─── Doctor: load patient dropdown ──────────────────────────────────────────
 async function initDoctorMode() {
     const container = document.getElementById('patient-select-container');
-    const select = document.getElementById('assign-patient');
-    if (container && select) {
-        container.classList.remove('hidden');
-        try {
-            const patients = await apiFetch('/users/patients');
-            patients.forEach(p => {
-                const opt = document.createElement('option');
-                opt.value = p._id;
-                opt.textContent = `${p.name} (${p.email})`;
-                select.appendChild(opt);
-            });
-        } catch (err) { console.error('Failed to load patients', err); }
+    const select    = document.getElementById('assign-patient');
+    if (!container || !select) return;
+
+    container.classList.remove('hidden');
+    try {
+        const patients = await apiFetch('/users/patients');
+        patients.forEach(p => {
+            const opt = document.createElement('option');
+            opt.value       = p._id;
+            opt.textContent = `${p.name} (${p.email})`;
+            select.appendChild(opt);
+        });
+    } catch (err) {
+        console.error('Failed to load patients:', err.message);
     }
 }
 
-function syncProfileAvatar() {
-    const user = JSON.parse(localStorage.getItem('user'));
-    if (user) {
-        document.querySelectorAll('img[alt="Profile"]').forEach(img => {
-            img.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
-        });
-    }
-}
+// ─── Filter UI ───────────────────────────────────────────────────────────────
+window.setFilter = function(filter) {
+    currentFilter = filter;
 
-function initDaySelectors() {
-    const dayBtns = document.querySelectorAll('#add-med-form button[type="button"].flex-1');
-    dayBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            btn.classList.toggle('bg-primary');
-            btn.classList.toggle('text-white');
-            btn.classList.toggle('bg-slate-50');
-            btn.classList.toggle('text-slate-400');
-            btn.classList.toggle('border-primary');
-        });
+    // Update tab styles
+    ['active', 'onhold', 'completed', 'all'].forEach(id => {
+        const btn = document.getElementById(`filter-${id}`);
+        if (!btn) return;
+        btn.className = 'px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-400 border border-slate-100 hover:border-primary/30 transition-all';
     });
-}
 
-function initFilters() {
-    const filterBtns = document.querySelectorAll('.flex.bg-white.p-1.rounded-xl button');
-    filterBtns.forEach(btn => {
-        btn.addEventListener('click', () => {
-            filterBtns.forEach(b => {
-                b.classList.remove('bg-primary', 'text-white');
-                b.classList.add('text-slate-400');
-            });
-            btn.classList.add('bg-primary', 'text-white');
-            btn.classList.remove('text-slate-400');
-            currentFilter = btn.textContent.trim().toLowerCase();
-            loadMedicines();
-        });
-    });
-}
+    const activeMap = { 'active': 'filter-active', 'on hold': 'filter-onhold', 'completed': 'filter-completed', 'all': 'filter-all' };
+    const activeBtn = document.getElementById(activeMap[filter]);
+    if (activeBtn) activeBtn.className = 'px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white transition-all';
 
+    loadMedicines();
+};
+
+// ─── READ: Load medicine list ─────────────────────────────────────────────────
 async function loadMedicines() {
+    if (!medicineList) return;
+
     medicineList.innerHTML = `
         <div class="flex items-center justify-center py-20">
             <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-primary"></div>
-        </div>
-    `;
+        </div>`;
 
     try {
-        const user = JSON.parse(localStorage.getItem('user'));
         const medicines = await apiFetch('/medicines');
 
-        // If doctor, show all medicines or maybe we should filter by selected patient
-        // For now, doctors see all prescriptions they've created
-        const filtered = medicines.filter(med => (med.status || 'active') === currentFilter);
-
-        medicineList.innerHTML = '';
+        const filtered = currentFilter === 'all'
+            ? medicines
+            : medicines.filter(m => (m.status || 'active') === currentFilter);
 
         if (filtered.length === 0) {
             medicineList.innerHTML = `
                 <div class="card-white flex flex-col items-center justify-center py-20 text-slate-400">
                     <i data-lucide="package-open" class="w-16 h-16 mb-4 opacity-10"></i>
-                    <p class="text-lg font-display font-bold">No ${currentFilter} medications</p>
-                    <p class="text-sm">Prescriptions will appear here.</p>
-                </div>
-            `;
+                    <p class="text-lg font-display font-bold">No ${currentFilter === 'all' ? '' : currentFilter} medications</p>
+                    <p class="text-sm mt-1">Use the form to add a new prescription.</p>
+                </div>`;
             lucide.createIcons();
             return;
         }
 
-        filtered.forEach(med => {
-            const card = document.createElement('div');
-            card.className = 'card-white group hover:border-primary/30 transition-all duration-300';
-            card.innerHTML = `
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-6">
-                        <div class="w-16 h-16 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-center justify-center text-emerald-500">
-                            <i data-lucide="pill" class="w-8 h-8"></i>
-                        </div>
-                        <div>
-                            <div class="flex items-center gap-3">
-                                <h4 class="text-xl font-display font-bold text-slate-800">${med.name}</h4>
-                                <span class="px-2 py-0.5 ${getStatusColor(med.status)} text-[10px] font-bold uppercase rounded-md">${med.status || 'Active'}</span>
-                                ${user.role === 'doctor' && med.user ? `<span class="text-[10px] text-slate-400 font-bold uppercase">For: ${med.user.name || 'Patient'}</span>` : ''}
+        medicineList.innerHTML = filtered.map(med => {
+            const statusMap = {
+                'active':    { cls: 'bg-emerald-100 text-emerald-700', label: 'Active' },
+                'on hold':   { cls: 'bg-amber-100 text-amber-700',    label: 'On Hold' },
+                'completed': { cls: 'bg-slate-100 text-slate-500',    label: 'Completed' },
+            };
+            const s = statusMap[med.status || 'active'] || statusMap['active'];
+
+            // Convert stored "08:30 AM" to 24h for display of native time input (for edit pre-fill)
+            return `
+                <div class="card-white group hover:border-primary/20 transition-all duration-200">
+                    <div class="flex items-start justify-between gap-4">
+                        <!-- Info -->
+                        <div class="flex items-start gap-4 flex-1 min-w-0">
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                                <i data-lucide="pill" class="w-6 h-6"></i>
                             </div>
-                            <div class="flex items-center gap-6 mt-2">
-                                <p class="text-sm font-medium text-slate-500 flex items-center gap-1.5">
-                                    <span class="font-bold text-slate-800">${med.dosage || '500mg'}</span> • Oral Tablet
-                                </p>
-                                <p class="text-sm font-medium text-slate-500 flex items-center gap-1.5">
-                                    <i data-lucide="clock" class="w-4 h-4 text-slate-300"></i> ${med.time}
-                                </p>
-                                <p class="text-sm font-medium text-slate-500 flex items-center gap-1.5">
-                                    <i data-lucide="calendar" class="w-4 h-4 text-slate-300"></i> ${med.frequency}
-                                </p>
+                            <div class="min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap mb-1">
+                                    <h4 class="text-lg font-display font-bold text-slate-800">${escapeHtml(med.name)}</h4>
+                                    <span class="px-2 py-0.5 ${s.cls} text-[10px] font-bold uppercase rounded-md">${s.label}</span>
+                                </div>
+                                <div class="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-300"></i>
+                                        ${escapeHtml(med.time)}
+                                    </span>
+                                    ${med.dosage ? `<span class="flex items-center gap-1">
+                                        <i data-lucide="activity" class="w-3.5 h-3.5 text-slate-300"></i>
+                                        ${escapeHtml(med.dosage)}
+                                    </span>` : ''}
+                                    <span class="flex items-center gap-1">
+                                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-300"></i>
+                                        ${escapeHtml(med.frequency || 'Daily')}
+                                    </span>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    
-                    <div class="flex items-center gap-4">
-                        <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <button onclick="deleteMedicine('${med._id}')" class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all">
-                                <i data-lucide="trash-2" class="w-5 h-5"></i>
+
+                        <!-- Actions -->
+                        <div class="flex items-center gap-2 shrink-0">
+                            <button onclick="editMedicine('${med._id}')"
+                                class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all"
+                                title="Edit">
+                                <i data-lucide="pencil" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="toggleStatus('${med._id}', '${med.status || 'active'}')"
+                                class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-amber-50 hover:text-amber-500 transition-all"
+                                title="${med.status === 'active' ? 'Pause' : 'Activate'}">
+                                <i data-lucide="${med.status === 'active' ? 'pause' : 'play'}" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="deleteMedicine('${med._id}')"
+                                class="w-9 h-9 rounded-xl bg-slate-50 text-rose-400 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"
+                                title="Delete">
+                                <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
                         </div>
                     </div>
-                </div>
-            `;
-            medicineList.appendChild(card);
-        });
+                </div>`;
+        }).join('');
+
         lucide.createIcons();
     } catch (err) {
-        medicineList.innerHTML = '<div class="p-8 text-center text-rose-500 font-bold">Failed to load medicines. Please try again.</div>';
+        medicineList.innerHTML = `
+            <div class="card-white py-12 text-center text-rose-500 font-bold">
+                <i data-lucide="wifi-off" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
+                <p>Failed to load medicines.</p>
+                <button onclick="loadMedicines()" class="mt-4 px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold">Retry</button>
+            </div>`;
+        lucide.createIcons();
     }
 }
 
-function getStatusColor(status) {
-    switch (status) {
-        case 'on hold': return 'bg-amber-100 text-amber-600';
-        case 'completed': return 'bg-slate-100 text-slate-500';
-        default: return 'bg-emerald-100 text-emerald-600';
-    }
+// ─── Helper: XSS safe ────────────────────────────────────────────────────────
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
-addMedForm?.addEventListener('submit', async (e) => {
+// ─── Helper: convert 12h → 24h for <input type="time"> ──────────────────────
+function to24h(timeStr) {
+    if (!timeStr) return '';
+    const m = timeStr.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+    if (!m) return '';
+    let h = parseInt(m[1]);
+    const min = m[2];
+    const period = m[3].toUpperCase();
+    if (period === 'AM' && h === 12) h = 0;
+    if (period === 'PM' && h !== 12) h += 12;
+    return `${String(h).padStart(2,'0')}:${min}`;
+}
+
+// ─── Helper: convert 24h → 12h AM/PM ─────────────────────────────────────────
+function to12h(rawTime) {
+    if (!rawTime) return '';
+    const [hStr, mStr] = rawTime.split(':');
+    const h24 = parseInt(hStr, 10);
+    const period = h24 >= 12 ? 'PM' : 'AM';
+    const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+    return `${String(h12).padStart(2,'0')}:${mStr} ${period}`;
+}
+
+// ─── UPDATE (enter edit mode): prefill form ───────────────────────────────────
+window.editMedicine = async function(id) {
+    try {
+        const med = await apiFetch(`/medicines/${id}`);
+        editingId = id;
+
+        document.getElementById('edit-med-id').value    = id;
+        document.getElementById('med-name').value       = med.name;
+        document.getElementById('med-dosage').value     = med.dosage || '';
+        document.getElementById('med-time').value       = to24h(med.time);
+        document.getElementById('med-frequency').value  = med.frequency || 'Daily';
+
+        // Show status field in edit mode
+        const statusContainer = document.getElementById('status-container');
+        statusContainer.classList.remove('hidden');
+        document.getElementById('med-status').value = med.status || 'active';
+
+        // Update form UI to edit mode
+        document.getElementById('form-title').textContent = 'Edit Medication';
+        document.getElementById('form-icon').className = 'w-14 h-14 rounded-2xl bg-amber-100 flex items-center justify-center text-amber-500';
+        document.getElementById('form-icon').innerHTML = '<i data-lucide="pencil" class="w-7 h-7"></i>';
+        lucide.createIcons();
+
+        const submitBtn = document.getElementById('submit-btn');
+        submitBtn.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i> Save Changes';
+        submitBtn.className = 'flex-1 py-4 bg-amber-500 text-white font-bold rounded-2xl shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2';
+        lucide.createIcons();
+
+        document.getElementById('cancel-edit-btn').classList.remove('hidden');
+
+        // Scroll form into view
+        document.getElementById('add-med-form').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } catch (err) {
+        alert('Failed to load medicine details: ' + err.message);
+    }
+};
+
+// ─── Cancel edit → back to create mode ───────────────────────────────────────
+window.cancelEdit = function() {
+    editingId = null;
+    addMedForm.reset();
+    document.getElementById('edit-med-id').value = '';
+    document.getElementById('status-container').classList.add('hidden');
+    document.getElementById('cancel-edit-btn').classList.add('hidden');
+
+    document.getElementById('form-title').textContent = 'Add Medication';
+    document.getElementById('form-icon').className = 'w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary';
+    document.getElementById('form-icon').innerHTML = '<i data-lucide="plus" class="w-7 h-7"></i>';
+
+    const submitBtn = document.getElementById('submit-btn');
+    submitBtn.innerHTML = '<i data-lucide="plus" class="w-5 h-5"></i> Add Medication';
+    submitBtn.className = 'flex-1 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2';
+    lucide.createIcons();
+};
+
+// ─── CREATE + UPDATE: form submit ─────────────────────────────────────────────
+async function handleFormSubmit(e) {
     e.preventDefault();
     const user = JSON.parse(localStorage.getItem('user'));
 
-    // Task 24 & 25: Mandatory Fields and Validation
-    const name = document.getElementById('med-name').value;
-    const time = document.getElementById('med-time').value;
-    const dosage = document.getElementById('med-dosage').value;
+    const name      = document.getElementById('med-name').value.trim();
+    const rawTime   = document.getElementById('med-time').value;
+    const dosage    = document.getElementById('med-dosage').value.trim();
     const patientId = document.getElementById('assign-patient')?.value;
     const frequency = document.getElementById('med-frequency')?.value || 'Daily';
+    const status    = document.getElementById('med-status')?.value || 'active';
 
-    if (!name || !time || (user.role === 'doctor' && !patientId)) {
-        alert('Please fill in all mandatory fields.');
+    if (!name || !rawTime) {
+        showFormError('Please fill in Medication Name and Time.');
+        return;
+    }
+    if (user.role === 'doctor' && !editingId && !patientId) {
+        showFormError('Please select a patient to assign this medication.');
         return;
     }
 
-    // Simple time validation (HH:MM AM/PM)
-    const timeRegex = /^(0?[1-9]|1[0-2]):[0-5][0-9]\s(AM|PM)$/i;
-    if (!timeRegex.test(time)) {
-        alert('Please enter a valid time (e.g., 08:00 AM)');
-        return;
-    }
-
-    const data = { name, time, dosage, frequency, status: 'active' };
-    if (user.role === 'doctor') data.user = patientId;
-
-    const submitBtn = e.target.querySelector('button[type="submit"]');
-    const originalText = submitBtn.innerHTML;
+    const time = to12h(rawTime);
+    const submitBtn = document.getElementById('submit-btn');
+    const originalHTML = submitBtn.innerHTML;
     submitBtn.disabled = true;
-    submitBtn.innerHTML = '<i class="animate-spin inline-block w-4 h-4 mr-2" data-lucide="loader-2"></i> Scheduling...';
-    lucide.createIcons();
+    submitBtn.innerHTML = '<svg class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path></svg> Saving...';
 
     try {
-        const res = await apiFetch('/medicines', {
-            method: 'POST',
-            body: JSON.stringify(data)
-        });
-
-        if (res._id) {
-            // Task 26: Success Message
-            submitBtn.innerHTML = '<i data-lucide="check" class="inline-block w-4 h-4 mr-2"></i> Scheduled!';
-            submitBtn.classList.remove('bg-primary');
-            submitBtn.classList.add('bg-emerald-500');
-            lucide.createIcons();
-
-            setTimeout(() => {
-                addMedForm.reset();
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-                submitBtn.classList.remove('bg-emerald-500');
-                submitBtn.classList.add('bg-primary');
-                lucide.createIcons();
-                loadMedicines();
-            }, 1500);
+        if (editingId) {
+            // ── UPDATE ──
+            await apiFetch(`/medicines/${editingId}`, {
+                method: 'PUT',
+                body: JSON.stringify({ name, time, dosage, frequency, status })
+            });
+            showFormSuccess('Medication updated successfully!');
+            cancelEdit();
         } else {
-            alert(res.msg || 'Failed to add medicine');
-            submitBtn.disabled = false;
-            submitBtn.innerHTML = originalText;
+            // ── CREATE ──
+            const data = { name, time, dosage, frequency };
+            if (user.role === 'doctor' && patientId) data.user = patientId;
+            await apiFetch('/medicines', { method: 'POST', body: JSON.stringify(data) });
+            addMedForm.reset();
+            showFormSuccess('Medication scheduled successfully!');
         }
-    } catch (err) {
-        alert('Error adding medicine');
-        submitBtn.disabled = false;
-        submitBtn.innerHTML = originalText;
-    }
-});
-
-async function deleteMedicine(id) {
-    if (!confirm('Are you sure you want to remove this medicine?')) return;
-    try {
-        await apiFetch(`/medicines/${id}`, { method: 'DELETE' });
         loadMedicines();
     } catch (err) {
-        alert('Error deleting medicine');
+        showFormError(err.message || 'Failed to save medication.');
+    } finally {
+        submitBtn.disabled = false;
+        submitBtn.innerHTML = originalHTML;
+        lucide.createIcons();
     }
 }
 
-async function renderAdherenceGauge() {
-    const ctx = document.getElementById('adherence-gauge');
-    if (!ctx) return;
-    try {
-        const user = JSON.parse(localStorage.getItem('user'));
-        if (user.role === 'doctor') {
-            ctx.parentElement.parentElement.classList.add('hidden');
-            return;
-        }
-        const stats = await apiFetch(`/logs/stats/${user.id || user._id}`);
-        const avg = stats.length > 0 ? stats.reduce((acc, s) => acc + s.percentage, 0) / stats.length : 0;
-        const score = Math.round(avg);
-        new Chart(ctx, {
-            type: 'doughnut',
-            data: { datasets: [{ data: [score, 100 - score], backgroundColor: ['#10b981', '#f1f5f9'], borderWidth: 0 }] },
-            options: { cutout: '80%', responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: { enabled: false } } }
-        });
-        const pctText = ctx.parentElement.querySelector('span');
-        if (pctText) pctText.textContent = `${score}%`;
-    } catch (err) { console.error('Gauge error:', err); }
+// ─── Form feedback helpers ─────────────────────────────────────────────────────
+function showFormSuccess(msg) {
+    showToast(msg, 'emerald');
+}
+function showFormError(msg) {
+    showToast(msg, 'rose');
+}
+function showToast(msg, color) {
+    document.getElementById('med-toast')?.remove();
+    const toast = document.createElement('div');
+    toast.id = 'med-toast';
+    toast.className = `fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-4 bg-${color}-500 text-white font-bold rounded-2xl shadow-xl text-sm transition-all`;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 3000);
 }
 
-// Handle header logout
-document.getElementById('header-logout')?.addEventListener('click', () => {
-    localStorage.clear();
-    window.location.href = 'index.html';
-});
+// ─── TOGGLE STATUS (Pause / Activate) ────────────────────────────────────────
+window.toggleStatus = async function(id, currentStatus) {
+    const newStatus = currentStatus === 'active' ? 'on hold' : 'active';
+    try {
+        await apiFetch(`/medicines/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ status: newStatus })
+        });
+        loadMedicines();
+    } catch (err) {
+        alert('Failed to update status: ' + err.message);
+    }
+};
+
+// ─── DELETE ───────────────────────────────────────────────────────────────────
+window.deleteMedicine = async function(id) {
+    // Show inline confirmation instead of window.confirm (blocked in some environments)
+    const existingConfirm = document.getElementById(`confirm-${id}`);
+    if (existingConfirm) {
+        // Already showing confirm — perform the deletion
+        existingConfirm.remove();
+        try {
+            await apiFetch(`/medicines/${id}`, { method: 'DELETE' });
+            showFormSuccess('Medication removed.');
+            if (editingId === id) cancelEdit();
+            loadMedicines();
+        } catch (err) {
+            showFormError('Failed to delete: ' + (err.message || 'Server error'));
+        }
+        return;
+    }
+
+    // Show a small inline confirm banner under the card
+    const card = document.querySelector(`button[onclick="deleteMedicine('${id}')"]`)?.closest('.card-white');
+    if (!card) return;
+
+    const confirmBar = document.createElement('div');
+    confirmBar.id = `confirm-${id}`;
+    confirmBar.className = 'mt-3 flex items-center justify-between gap-3 p-3 bg-rose-50 rounded-xl border border-rose-100';
+    confirmBar.innerHTML = `
+        <span class="text-sm text-rose-700 font-semibold">Delete this medication?</span>
+        <div class="flex gap-2">
+            <button onclick="deleteMedicine('${id}')" class="px-4 py-1.5 bg-rose-500 text-white text-sm font-bold rounded-lg hover:bg-rose-600 transition-all">Yes, Delete</button>
+            <button onclick="document.getElementById('confirm-${id}').remove()" class="px-4 py-1.5 bg-white text-slate-500 text-sm font-bold rounded-lg border border-slate-200 hover:bg-slate-50 transition-all">Cancel</button>
+        </div>`;
+    card.appendChild(confirmBar);
+};

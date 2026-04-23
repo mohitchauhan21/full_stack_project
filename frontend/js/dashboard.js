@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-async function initDashboard() {
+window.initDashboard = async function initDashboard() {
     const container = document.getElementById('dashboard-app');
 
     if (user.role === 'doctor') {
@@ -24,6 +24,8 @@ async function initDashboard() {
     }
     lucide.createIcons();
 }
+
+window.renderPatientView = renderPatientView;
 
 async function renderPatientContainer(container) {
     container.innerHTML = `
@@ -423,23 +425,72 @@ async function renderCaregiverView(container) {
     } catch (err) { console.error('Caregiver view error:', err); }
 }
 
-async function linkPatient() {
-    const email = prompt('Enter the patient email address:');
-    if (!email) return;
+window.linkPatient = function() {
+    // Remove any existing modal
+    document.getElementById('link-patient-modal')?.remove();
 
-    try {
-        const res = await apiFetch('/users/link-patient', {
-            method: 'POST',
-            body: JSON.stringify({ email })
-        });
-        if (res.msg) {
-            alert(res.msg);
+    const modal = document.createElement('div');
+    modal.id = 'link-patient-modal';
+    modal.className = 'fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+    modal.innerHTML = `
+        <div class="bg-white rounded-[2.5rem] shadow-2xl w-full max-w-md overflow-hidden">
+            <div class="flex items-center justify-between p-8 pb-0">
+                <h3 class="text-2xl font-display font-bold text-slate-800">Link Patient</h3>
+                <button onclick="document.getElementById('link-patient-modal').remove()" class="w-10 h-10 rounded-xl bg-slate-50 flex items-center justify-center text-slate-400 hover:text-rose-500 transition-all">&times;</button>
+            </div>
+            <form id="link-patient-form" class="p-8 space-y-6">
+                <div>
+                    <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Patient Email Address</label>
+                    <input type="email" id="link-patient-email" placeholder="patient@example.com" required
+                        class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                </div>
+                <button type="submit" class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                    Link Patient
+                </button>
+            </form>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    // Close on backdrop click
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+
+    document.getElementById('link-patient-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const email = document.getElementById('link-patient-email').value.trim();
+        if (!email) return;
+
+        const btn = e.target.querySelector('button[type="submit"]');
+        btn.disabled = true;
+        btn.textContent = 'Linking...';
+
+        try {
+            await apiFetch('/users/link-patient', {
+                method: 'POST',
+                body: JSON.stringify({ email })
+            });
+            modal.remove();
+            // Show success toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-xl text-sm';
+            toast.textContent = 'Patient linked successfully!';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
             initDashboard();
+        } catch (err) {
+            btn.disabled = false;
+            btn.textContent = 'Link Patient';
+            // Show error inline
+            const errDiv = document.createElement('p');
+            errDiv.className = 'text-sm text-rose-500 font-semibold text-center';
+            errDiv.textContent = err.message || 'Patient not found. Please check the email.';
+            e.target.appendChild(errDiv);
+            setTimeout(() => errDiv.remove(), 3000);
         }
-    } catch (err) {
-        alert('Failed to link patient. Please ensure the email is correct.');
-    }
-}
+    });
+};
 
 async function renderDoctorView(container) {
     container.innerHTML = `
@@ -738,15 +789,7 @@ window.viewPatientFile = async function (patientId, patientName) {
     }
 }
 
-window.linkPatient = async function () {
-    const email = prompt('Enter patient email:');
-    if (email) {
-        try {
-            await apiFetch('/users/link-patient', { method: 'POST', body: JSON.stringify({ email }) });
-            initDashboard();
-        } catch (err) { alert('Patient not found'); }
-    }
-}
+
 
 window.addNewPrescription = async function () {
     // Create Modal Overlay
@@ -781,7 +824,7 @@ window.addNewPrescription = async function () {
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Time</label>
-                        <input type="text" id="modal-med-time" placeholder="08:00 AM" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all" required>
+                        <input type="time" id="modal-med-time" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all" required>
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Dosage</label>
@@ -805,30 +848,55 @@ window.addNewPrescription = async function () {
         submitBtn.disabled = true;
         submitBtn.textContent = 'Processing...';
 
+        const rawTime = document.getElementById('modal-med-time').value;
+        const [hStr, mStr] = rawTime.split(':');
+        const h24 = parseInt(hStr, 10);
+        const period = h24 >= 12 ? 'PM' : 'AM';
+        const h12 = h24 % 12 === 0 ? 12 : h24 % 12;
+        const time12 = `${String(h12).padStart(2,'0')}:${mStr} ${period}`;
+
         const data = {
             user: document.getElementById('modal-patient').value,
             name: document.getElementById('modal-med-name').value,
-            time: document.getElementById('modal-med-time').value,
+            time: time12,
             dosage: document.getElementById('modal-med-dosage').value,
             frequency: 'Daily'
         };
 
         try {
             await apiFetch('/medicines', { method: 'POST', body: JSON.stringify(data) });
-            alert('Prescription authorized successfully!');
             modal.remove();
             initDashboard();
+
+            // Show success toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-xl text-sm';
+            toast.textContent = 'Prescription authorized!';
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
         } catch (err) {
-            alert('Clinical authorization failed.');
+            alert('Failed: ' + (err.message || 'Server error'));
             submitBtn.disabled = false;
             submitBtn.textContent = 'Authorize Prescription';
         }
     });
 }
 
-window.logMed = async function (id, status) {
+window.logMed = async function (medId, status) {
+    // Visually disable the card buttons while saving
     try {
-        await apiFetch('/logs', { method: 'POST', body: JSON.stringify({ medicineId: id, status }) });
-        initDashboard();
-    } catch (err) { console.error(err); }
-}
+        await apiFetch('/logs', {
+            method: 'POST',
+            body: JSON.stringify({ medicineId: medId, status })
+        });
+        // Refresh only the schedule section, not the entire page
+        await renderPatientView();
+    } catch (err) {
+        const msg = err.message || '';
+        if (msg.includes('already logged')) {
+            alert('This dose has already been logged for today.');
+        } else {
+            alert('Failed to save log: ' + msg);
+        }
+    }
+};
