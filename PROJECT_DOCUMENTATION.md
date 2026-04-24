@@ -106,16 +106,30 @@ The project follows a clean **Controller-Route** pattern on the backend and a st
 
 ---
 
-## 🚀 Deployment Guide
+## 🚀 Deployment Strategy (Separate Architecture)
 
-### Backend (Render/Heroku/Railway)
-1. Set `NODE_ENV=production`.
-2. Configure `MONGO_URI` with your MongoDB Atlas connection string.
-3. Configure `JWT_SECRET` with a secure random string.
+In the final production configuration, the system is split into two independent entities to optimize performance and scalability:
 
-### Frontend (Vercel/Netlify)
-1. Update `API_URL` in `frontend/js/api.js` to point to your deployed backend.
-2. Vercel will automatically use `vercel.json` to handle the SPA routing.
+### 1. 🏁 Backend (Pure API)
+- **Host**: Render, Railway, or Heroku.
+- **Responsibility**: Serves as the "Brain". Manages DB connection, JWT issuance, and data processing.
+- **Configuration**:
+    - `cors({ origin: '*' })` is enabled to allow the separate frontend to communicate with it.
+    - Static file serving is disabled to minimize server overhead.
+
+### 2. 🎨 Frontend (Static UI)
+- **Host**: Vercel or Netlify.
+- **Responsibility**: Serves as the "Face". Purely static HTML/JS/CSS.
+- **Configuration**:
+    - `frontend/js/api.js` contains a dynamic `API_URL` check:
+        - Uses `localhost:5000` during development.
+        - Uses the Render URL (e.g., `https://medremind-backend.onrender.com/api`) in production.
+
+### 🔗 Integration Flow
+1. User visits the Vercel URL.
+2. Frontend makes a `fetch` request to the Render API URL.
+3. Backend validates the request and responds with JSON data.
+4. Frontend updates the UI dynamically.
 
 ---
 *MedRemind: Bridging clinical data with daily life.*
