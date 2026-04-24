@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - MedRemind</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { primary: '#0ea5e9' },
+                    fontFamily: { display: ['Outfit', 'sans-serif'] }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-slate-50 flex items-center justify-center min-h-screen p-4 font-['Inter']">
+    <div class="max-w-md w-full bg-white p-10 rounded-[2.5rem] shadow-xl shadow-slate-200/50 border border-slate-100">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-display font-bold text-primary mb-2">MedRemind</h1>
+            <p class="text-slate-400 font-medium">Healthcare management made simple</p>
+        </div>
+        
+        <form id="login-form" class="space-y-6">
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Email Address</label>
+                <input type="email" id="login-email" placeholder="name@example.com" required
+                    class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+            </div>
+            <div>
+                <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Password</label>
+                <input type="password" id="login-password" placeholder="••••••••" required
+                    class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary transition-all">
+            </div>
+            <button type="submit" 
+                class="w-full py-5 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.02] active:scale-[0.98] transition-all">
+                Sign In
+            </button>
+        </form>
+        
+        <div class="mt-8 text-center">
+            <p class="text-slate-500">New to MedRemind? <a href="register.html" class="text-primary font-bold">Create Account</a></p>
+        </div>
+    </div>
+
+    <script type="module" src="/js/api.js"></script>
+    <script type="module" src="/js/auth.js"></script>
+</body>
+</html>

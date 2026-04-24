@@ -6,17 +6,17 @@ const renderSidebar = () => {
 
     const getNavLinks = (role) => {
         const links = [
-            { href: '/pages/dashboard.html', label: 'Dashboard', icon: 'layout-dashboard', id: 'dashboard' }
+            { href: '/dashboard.html', label: 'Dashboard', icon: 'layout-dashboard', id: 'dashboard' }
         ];
 
         if (role === 'doctor' || role === 'patient') {
-            links.push({ href: '/pages/medicines.html', label: 'Medication', icon: 'pill', id: 'medicines' });
+            links.push({ href: '/medicines.html', label: 'Medication', icon: 'pill', id: 'medicines' });
         }
 
         if (role !== 'doctor') {
-            links.push({ href: '/pages/history.html', label: 'History', icon: 'activity', id: 'history' });
+            links.push({ href: '/history.html', label: 'History', icon: 'activity', id: 'history' });
         }
-        links.push({ href: '/pages/profile.html', label: 'My Profile', icon: 'user', id: 'profile' });
+        links.push({ href: '/profile.html', label: 'My Profile', icon: 'user', id: 'profile' });
 
         return links;
     };
@@ -115,7 +115,7 @@ const renderSidebar = () => {
     // Global Logout handler
     document.getElementById('global-logout')?.addEventListener('click', () => {
         localStorage.clear();
-        window.location.href = 'index.html';
+        window.location.href = '/index.html';
     });
 };
 

@@ -25,11 +25,11 @@ The project follows a clean **Controller-Route** pattern on the backend and a st
 - `models/`: Data schemas.
 
 ### 📁 Frontend (`/frontend`)
-- `pages/`: 📂 **New Centralized Page Directory**
-    - `index.html`, `dashboard.html`, `medicines.html`, etc.
+- `index.html`, `dashboard.html`, `medicines.html`, etc.: 📂 **HTML files are located at the root for Build Compatibility.**
 - `js/`: Modular logic including `api.js` (central fetch) and `layout.js` (UI engine).
 - `css/main.css`: Design system entry point.
-- `postcss.config.js` & `tailwind.config.js`: Modern build configuration.
+- `package.json`: Updated with a simplified `build` script (removed `tsc`).
+- `vercel.json`: Configured for clean URLs pointing to the root.
 
 ---
 

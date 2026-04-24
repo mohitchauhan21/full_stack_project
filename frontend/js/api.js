@@ -21,7 +21,7 @@ const apiFetch = async (endpoint, options = {}) => {
 
     if (response.status === 401) {
         localStorage.clear();
-        window.location.href = '/pages/index.html';
+        window.location.href = '/index.html';
         return;
     }
 

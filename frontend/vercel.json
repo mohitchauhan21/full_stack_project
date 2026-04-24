@@ -5,31 +5,31 @@
   "rewrites": [
     {
       "source": "/",
-      "destination": "/pages/index.html"
+      "destination": "/index.html"
     },
     {
       "source": "/login",
-      "destination": "/pages/index.html"
+      "destination": "/index.html"
     },
     {
       "source": "/register",
-      "destination": "/pages/register.html"
+      "destination": "/register.html"
     },
     {
       "source": "/dashboard",
-      "destination": "/pages/dashboard.html"
+      "destination": "/dashboard.html"
     },
     {
       "source": "/medicines",
-      "destination": "/pages/medicines.html"
+      "destination": "/medicines.html"
     },
     {
       "source": "/history",
-      "destination": "/pages/history.html"
+      "destination": "/history.html"
     },
     {
       "source": "/profile",
-      "destination": "/pages/profile.html"
+      "destination": "/profile.html"
     }
   ]
 }
