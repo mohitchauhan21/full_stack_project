@@ -42,6 +42,14 @@ async function initDoctorMode() {
     } catch (err) {
         console.error('Failed to load patients:', err.message);
     }
+
+    // Hide medicine list and expand form for doctors
+    document.getElementById('list-wrapper')?.classList.add('hidden');
+    const formWrapper = document.getElementById('form-wrapper');
+    if (formWrapper) {
+        formWrapper.classList.remove('lg:col-span-5');
+        formWrapper.classList.add('lg:col-span-12');
+    }
 }
 
 // ─── Filter UI ───────────────────────────────────────────────────────────────
@@ -141,8 +149,8 @@ async function loadMedicines() {
                                 </div>
                                 ${med.notes ? `
                                 <div class="mt-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2">
-                                    <i data-lucide="file-text" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
-                                    <p class="text-sm font-medium text-amber-800">${escapeHtml(med.notes)}</p>
+                                    <span class="text-base shrink-0 leading-none mt-0.5">📝</span>
+                                    <p class="text-sm font-medium text-amber-800"><span class="font-bold">Doctor:</span> ${escapeHtml(med.notes)}</p>
                                 </div>` : ''}
                             </div>
                         </div>

@@ -224,8 +224,15 @@ function renderCalendarAndStreak(allLogs) {
     // Update Streak UI
     const currentEl = document.getElementById('current-streak');
     const longestEl = document.getElementById('longest-streak');
+    const lastMissedEl = document.getElementById('last-missed-date');
+
+    const sortedLogs = [...allLogs].sort((a,b) => new Date(b.date) - new Date(a.date));
+    const lastMissedLog = sortedLogs.find(l => l.status === 'skipped');
+    const lastMissedStr = lastMissedLog ? new Date(lastMissedLog.date).toLocaleDateString() : 'Never';
+
     if (currentEl) currentEl.innerHTML = `${currentStreak} <span class="text-xl font-medium text-orange-300">days</span>`;
     if (longestEl) longestEl.textContent = `${longestStreak} days`;
+    if (lastMissedEl) lastMissedEl.textContent = lastMissedStr;
 
     // Render Calendar UI
     const gridEl = document.getElementById('calendar-grid');
@@ -242,11 +249,16 @@ function renderCalendarAndStreak(allLogs) {
                 iconClass = 'text-rose-500 opacity-100';
             }
 
+            let tooltipText = 'No Data';
+            if (d.status === 'green') tooltipText = 'Perfect Adherence';
+            else if (d.status === 'red') tooltipText = 'Missed Dose(s)';
+
             const isSelected = selectedCalendarDate === d.dateStr;
             const ringClass = isSelected ? 'ring-2 ring-primary ring-offset-2 scale-105' : '';
 
             return `
                 <button onclick="filterByCalendarDate('${d.dateStr}')" 
+                        title="${tooltipText}"
                         class="flex flex-col items-center justify-center min-w-[4rem] h-[5rem] rounded-xl border ${bgClass} ${ringClass} hover:scale-105 transition-all snap-end shrink-0 relative overflow-hidden group">
                     <span class="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-70">${d.dayName}</span>
                     <span class="text-xl font-display font-bold">${d.dayNum}</span>

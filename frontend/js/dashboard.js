@@ -76,32 +76,30 @@ async function renderPatientContainer(container) {
             </div>
 
             <!-- Task 9: Weekly Progress Section -->
-            <div class="col-span-12 lg:col-span-4 space-y-8">
-                <div class="card-white">
-                    <h4 class="text-lg font-display font-bold text-slate-800 mb-8">Weekly Progress</h4>
-                    <div class="h-64">
-                        <canvas id="weekly-progress-chart"></canvas>
+            <!-- Task 9: Weekly Progress Section (Reduced Noise) -->
+            <div class="col-span-12 lg:col-span-4 space-y-6">
+                <div class="card-white p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-base font-display font-bold text-slate-800">Today's Progress</h4>
+                        <span id="daily-progress-pct" class="text-sm font-bold text-emerald-500">0%</span>
                     </div>
-                    <div class="mt-6 pt-6 border-t border-slate-50">
-                        <div class="flex items-center justify-between mb-2">
-                            <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Today's Goal</span>
-                            <span id="daily-progress-pct" class="text-xs font-bold text-primary">0%</span>
-                        </div>
-                        <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                            <div id="daily-progress-bar" class="bg-primary h-full transition-all duration-1000" style="width: 0%"></div>
-                        </div>
+                    <div class="w-full bg-slate-100 h-3 rounded-full overflow-hidden mb-6">
+                        <div id="daily-progress-bar" class="bg-emerald-500 h-full transition-all duration-1000" style="width: 0%"></div>
+                    </div>
+                    <div class="h-32">
+                        <canvas id="weekly-progress-chart"></canvas>
                     </div>
                 </div>
 
-                <div class="card-white">
-                    <div class="flex items-center gap-3 mb-6">
-                        <div class="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary">
-                            <i data-lucide="sparkles" class="w-6 h-6"></i>
+                <div class="card-white p-6">
+                    <div class="flex items-center gap-3 mb-2">
+                        <div class="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-500">
+                            <i data-lucide="sparkles" class="w-4 h-4"></i>
                         </div>
-                        <h4 class="text-lg font-display font-bold text-slate-800">Insights</h4>
+                        <h4 class="text-base font-display font-bold text-slate-800">Insights</h4>
                     </div>
-                    <div id="patient-insights" class="space-y-4">
-                        <p class="text-xs text-slate-400 italic">Analyzing your adherence patterns...</p>
+                    <div id="patient-insights" class="text-sm">
+                        <p class="text-slate-400 italic">Analyzing adherence...</p>
                     </div>
                 </div>
             </div>
@@ -175,19 +173,26 @@ async function renderPatientView() {
                 if (!isFuture) {
                     // Due now or overdue - show the standard "Take Now" blue banner
                     heroEl.innerHTML = `
-                        <div class="bg-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-sky-200 group">
-                            <div class="relative z-10 flex items-center justify-between">
-                                <div class="flex items-center gap-8">
-                                    <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center">
-                                        <i data-lucide="pill" class="w-10 h-10"></i>
+                        <div class="bg-emerald-500 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-200 group">
+                            <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                                <div class="flex items-center gap-6">
+                                    <div class="w-16 h-16 bg-white/20 backdrop-blur-md rounded-2xl flex items-center justify-center shrink-0">
+                                        <i data-lucide="pill" class="w-8 h-8"></i>
                                     </div>
                                     <div>
-                                        <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Due Now</p>
-                                        <h3 class="text-4xl font-display font-bold">${nextMed.name}</h3>
-                                        <p class="text-lg mt-1 opacity-90">${nextMed.time} • ${nextMed.dosage || '1 Tablet'}</p>
+                                        <p class="text-xs font-bold uppercase tracking-widest opacity-80 mb-1">Take Now</p>
+                                        <h3 class="text-3xl font-display font-bold">${nextMed.name}</h3>
+                                        <p class="text-base mt-1 opacity-90 font-medium">${nextMed.time} • ${nextMed.dosage || '1 Tablet'}</p>
                                     </div>
                                 </div>
-                                <button onclick="logMed('${nextMed._id}', 'taken')" class="px-10 py-5 bg-white text-primary font-bold rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all">Take Now</button>
+                                <div class="flex items-center gap-3 w-full md:w-auto">
+                                    <button onclick="logMed('${nextMed._id}', 'taken')" class="flex-1 md:flex-none px-8 py-4 bg-white text-emerald-600 font-bold rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all flex items-center justify-center gap-2">
+                                        <i data-lucide="check" class="w-5 h-5"></i> Take Now
+                                    </button>
+                                    <button onclick="alert('Snoozed for 10 minutes');" class="px-6 py-4 bg-white/20 text-white font-bold rounded-2xl hover:bg-white/30 transition-all flex items-center justify-center gap-2">
+                                        <i data-lucide="moon" class="w-5 h-5"></i> Snooze
+                                    </button>
+                                </div>
                             </div>
                             <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
                         </div>
@@ -199,18 +204,21 @@ async function renderPatientView() {
                             <h3 class="text-3xl font-display font-bold">All caught up for now!</h3>
                             <p class="mt-2 opacity-90">You've taken your scheduled medications so far. Next dose is coming up.</p>
                         </div>
-                        <div class="bg-white rounded-[2rem] p-6 shadow-lg shadow-slate-100/50 border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 animate-slide-up">
-                            <div class="flex items-center gap-5">
-                                <div class="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shrink-0">
+                        <div class="bg-white rounded-[2rem] p-6 shadow-lg shadow-slate-100/50 border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 animate-slide-up relative overflow-hidden">
+                            <div class="absolute top-0 left-0 w-2 h-full bg-emerald-500"></div>
+                            <div class="flex items-center gap-5 pl-4">
+                                <div class="w-14 h-14 bg-emerald-50 text-emerald-500 rounded-2xl flex items-center justify-center shrink-0">
                                     <i data-lucide="clock" class="w-7 h-7"></i>
                                 </div>
                                 <div>
                                     <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Next Upcoming Dose</p>
                                     <p class="text-xl font-display font-bold text-slate-800">${nextMed.name} <span class="text-slate-400 text-sm font-sans font-medium ml-1">at ${nextMed.time}</span></p>
+                                    <p class="text-xs text-slate-500 mt-0.5">${nextMed.dosage || '1 Tablet'}</p>
                                 </div>
                             </div>
-                            <div class="px-6 py-4 bg-slate-50 rounded-2xl border border-slate-100 shrink-0 w-full sm:w-auto text-center">
-                                <p id="countdown-timer" class="text-lg font-display font-bold text-primary tracking-wide font-mono">Next dose in: --h --m --s</p>
+                            <div class="px-8 py-5 bg-emerald-50/50 rounded-2xl border border-emerald-100 shrink-0 w-full sm:w-auto text-center">
+                                <p id="countdown-timer" class="text-2xl font-display font-bold text-emerald-600 tracking-wide font-mono">--h --m --s</p>
+                                <p class="text-[10px] text-emerald-500/70 font-bold uppercase tracking-widest mt-1">Remaining</p>
                             </div>
                         </div>
                     `;
@@ -244,7 +252,7 @@ async function renderPatientView() {
                         const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
                         const s = Math.floor((diffMs % (1000 * 60)) / 1000);
                         
-                        timerEl.textContent = `Next dose in: ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+                        timerEl.textContent = `${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
                     };
 
                     updateTimer(); // run immediately
@@ -280,7 +288,10 @@ async function renderPatientView() {
                                     <div>
                                         <div class="flex items-center gap-3">
                                             <h4 class="text-lg font-display font-bold text-slate-800">${m.name}</h4>
-                                            <span class="px-2 py-0.5 ${statusColor} text-[10px] font-bold uppercase rounded-md">${statusLabel}</span>
+                                            <span class="px-2 py-0.5 ${statusColor} text-[10px] font-bold uppercase rounded-md flex items-center gap-1">
+                                                <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
+                                                ${statusLabel}
+                                            </span>
                                         </div>
                                         <p class="text-sm text-slate-400 font-medium">${m.time} • ${m.dosage || '1 Tablet'}</p>
                                     </div>
@@ -361,9 +372,9 @@ function renderWeeklyProgress(stats) {
             datasets: [{
                 label: 'Adherence %',
                 data: stats.map(s => s.percentage),
-                backgroundColor: '#0ea5e9',
-                borderRadius: 12,
-                barThickness: 16
+                backgroundColor: '#10b981', // emerald-500
+                borderRadius: 4,
+                barThickness: 8
             }]
         },
         options: {
@@ -423,9 +434,12 @@ async function renderCaregiverView(container) {
                 </div>
             </div>
             
-            <div class="card-white p-8 bg-slate-900 text-white flex flex-col justify-center">
-                <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-2">Total Patients</p>
-                <h3 class="text-5xl font-display font-bold" id="caretaker-patient-count">0</h3>
+            <div class="card-white p-8 bg-rose-500 text-white flex flex-col justify-center relative overflow-hidden group">
+                <div class="relative z-10">
+                    <p class="text-[10px] font-bold uppercase tracking-widest opacity-80 mb-2">Patients At Risk</p>
+                    <h3 class="text-5xl font-display font-bold" id="caretaker-risk-count">0</h3>
+                </div>
+                <i data-lucide="alert-triangle" class="absolute -right-4 -bottom-4 w-32 h-32 text-white opacity-10 group-hover:scale-110 transition-transform"></i>
             </div>
         </div>
 
@@ -439,7 +453,6 @@ async function renderCaregiverView(container) {
 
     try {
         const patients = await apiFetch('/users/my-patients');
-        document.getElementById('caretaker-patient-count').textContent = patients.length;
 
         const patientData = await Promise.all(patients.map(async p => {
             const [stats, logs] = await Promise.all([
@@ -450,8 +463,17 @@ async function renderCaregiverView(container) {
             const lastLog = logs[0];
             const missedToday = logs.some(l => l.status === 'skipped' && new Date(l.date).toDateString() === new Date().toDateString());
 
-            return { ...p, adherence: avg, lastLog, missedToday };
+            const delayed = logs.some(l => l.status === 'pending' && new Date(l.date).toDateString() === new Date().toDateString());
+            let status = 'Active';
+            if (missedToday) status = 'Missed';
+            else if (delayed) status = 'Delayed';
+
+            return { ...p, adherence: avg, lastLog, missedToday, status };
         }));
+
+        const patientsAtRisk = patientData.filter(p => p.adherence < 70 || p.missedToday).length;
+        const riskCountEl = document.getElementById('caretaker-risk-count');
+        if (riskCountEl) riskCountEl.textContent = patientsAtRisk;
 
         const grid = document.getElementById('patient-grid');
         if (patientData.length === 0) {
@@ -462,11 +484,17 @@ async function renderCaregiverView(container) {
                     <div class="flex items-center gap-6 mb-8">
                         <div class="relative">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${p.name}" class="w-16 h-16 rounded-2xl bg-slate-50">
-                            ${p.missedToday ? `<div class="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 rounded-full border-4 border-white animate-pulse"></div>` : ''}
+                            ${p.status === 'Missed' ? `<div class="absolute -top-2 -right-2 w-6 h-6 bg-rose-500 rounded-full border-4 border-white animate-pulse"></div>` : ''}
                         </div>
-                        <div>
-                            <h4 class="text-xl font-display font-bold text-slate-800">${p.name}</h4>
-                            <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest">General Wellness</p>
+                        <div class="flex-1">
+                            <div class="flex items-center justify-between">
+                                <h4 class="text-xl font-display font-bold text-slate-800">${p.name}</h4>
+                                <span class="px-2 py-0.5 text-[10px] font-bold uppercase tracking-widest rounded-md ${p.status === 'Missed' ? 'bg-rose-100 text-rose-600' : p.status === 'Delayed' ? 'bg-amber-100 text-amber-600' : 'bg-emerald-100 text-emerald-600'} flex items-center gap-1">
+                                    <div class="w-1.5 h-1.5 rounded-full bg-current"></div>
+                                    ${p.status}
+                                </span>
+                            </div>
+                            <p class="text-slate-400 font-bold text-[10px] uppercase tracking-widest mt-1">General Wellness</p>
                         </div>
                     </div>
                     
@@ -495,9 +523,10 @@ async function renderCaregiverView(container) {
                     ` : ''}
 
                     <div class="flex gap-2">
-                        <button onclick="viewPatientFile('${p._id}', '${p.name}')" class="flex-1 py-3 bg-primary/5 text-primary font-bold rounded-xl hover:bg-primary hover:text-white transition-all">Details</button>
+                        <button onclick="viewPatientFile('${p._id}', '${p.name}')" class="flex-1 py-3 bg-slate-50 text-slate-600 font-bold rounded-xl hover:bg-slate-100 transition-all flex items-center justify-center gap-2 text-sm"><i data-lucide="folder-open" class="w-4 h-4"></i> View File</button>
                         <a href="tel:1234567890" class="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl hover:bg-emerald-50 hover:text-emerald-500 transition-all"><i data-lucide="phone"></i></a>
                         <a href="mailto:${p.email}" class="w-12 h-12 flex items-center justify-center bg-slate-50 text-slate-400 rounded-xl hover:bg-sky-50 hover:text-sky-500 transition-all"><i data-lucide="message-square"></i></a>
+                        <button onclick="alert('Reminder sent to ${p.name}')" class="w-12 h-12 flex items-center justify-center bg-amber-50 text-amber-500 rounded-xl hover:bg-amber-500 hover:text-white transition-all"><i data-lucide="zap"></i></button>
                     </div>
                 </div>
             `).join('');
@@ -505,20 +534,24 @@ async function renderCaregiverView(container) {
 
         // Task 33: Caregiver Alerts
         const alertsEl = document.getElementById('caregiver-alerts');
-        const caregiverAlerts = [];
+        const caregiverAlertsMap = {};
         patientData.forEach(p => {
-            if (p.missedToday) caregiverAlerts.push({ p, msg: `${p.name} missed their dose today.` });
-            if (p.adherence < 70) caregiverAlerts.push({ p, msg: `${p.name}'s weekly adherence is low (${p.adherence}%).` });
+            if (p.missedToday || p.adherence < 70) {
+                caregiverAlertsMap[p._id] = { p, messages: [] };
+                if (p.missedToday) caregiverAlertsMap[p._id].messages.push(`Missed dose today`);
+                if (p.adherence < 70) caregiverAlertsMap[p._id].messages.push(`Adherence low (${p.adherence}%)`);
+            }
         });
+        const caregiverAlerts = Object.values(caregiverAlertsMap);
 
         if (caregiverAlerts.length > 0) {
             alertsEl.innerHTML = caregiverAlerts.map(a => `
-                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between">
+                <div class="p-4 bg-rose-50/50 rounded-2xl border border-rose-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                     <div class="flex items-center gap-3">
-                        <div class="w-2 h-2 bg-rose-500 rounded-full"></div>
-                        <p class="text-sm font-bold text-slate-800">${a.msg}</p>
+                        <div class="w-2 h-2 bg-rose-500 rounded-full shrink-0"></div>
+                        <p class="text-sm font-medium text-slate-800"><span class="font-bold">${a.p.name}:</span> ${a.messages.join(' • ')}</p>
                     </div>
-                    <button onclick="viewPatientFile('${a.p._id}', '${a.p.name}')" class="text-xs font-bold text-primary">Check</button>
+                    <button onclick="viewPatientFile('${a.p._id}', '${a.p.name}')" class="text-xs font-bold px-4 py-2 bg-white text-rose-600 rounded-lg shadow-sm hover:bg-rose-50 transition-all border border-rose-100 shrink-0">View Patient</button>
                 </div>
             `).join('');
         }
@@ -607,35 +640,50 @@ async function renderDoctorView(container) {
             </div>
         </header>
 
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-            <!-- Task 20: Intelligent Alerts -->
-            <div class="md:col-span-2 card-white p-8">
-                <div class="flex items-center justify-between mb-8">
-                    <h4 class="text-lg font-display font-bold text-slate-800 flex items-center gap-2">
-                        <i data-lucide="bell-ring" class="text-rose-500 w-5 h-5"></i> Critical Care Alerts
-                    </h4>
+        <!-- Analytics Strip -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+            <div class="card-white p-6 flex items-center gap-6 border-l-4 border-emerald-500">
+                <div class="w-14 h-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-500 shrink-0">
+                    <i data-lucide="activity" class="w-6 h-6"></i>
                 </div>
-                <div id="doctor-alerts" class="space-y-4">
-                    <div class="animate-pulse flex space-x-4">
-                        <div class="rounded-full bg-slate-100 h-10 w-10"></div>
-                        <div class="flex-1 space-y-2 py-1">
-                            <div class="h-2 bg-slate-100 rounded"></div>
-                            <div class="h-2 bg-slate-100 rounded w-5/6"></div>
-                        </div>
-                    </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Avg Adherence</p>
+                    <h3 class="text-3xl font-display font-bold text-slate-800" id="doc-avg-adherence">--%</h3>
                 </div>
             </div>
+            <div class="card-white p-6 flex items-center gap-6 border-l-4 border-rose-500">
+                <div class="w-14 h-14 bg-rose-50 rounded-2xl flex items-center justify-center text-rose-500 shrink-0">
+                    <i data-lucide="alert-triangle" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">High Risk</p>
+                    <h3 class="text-3xl font-display font-bold text-slate-800" id="doc-high-risk-count">--</h3>
+                </div>
+            </div>
+            <div class="card-white p-6 flex items-center gap-6 border-l-4 border-sky-500">
+                <div class="w-14 h-14 bg-sky-50 rounded-2xl flex items-center justify-center text-sky-500 shrink-0">
+                    <i data-lucide="users" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <p class="text-xs font-bold text-slate-400 uppercase tracking-widest">Active Patients</p>
+                    <h3 class="text-3xl font-display font-bold text-slate-800" id="doc-patient-count">--</h3>
+                </div>
+            </div>
+        </div>
 
-            <div class="card-white p-8 bg-primary text-white">
-                <h4 class="text-lg font-display font-bold mb-6">Directory Overview</h4>
-                <div class="space-y-6">
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Active Patients</p>
-                        <h5 class="text-4xl font-display font-bold" id="doc-patient-count">--</h5>
-                    </div>
-                    <div>
-                        <p class="text-[10px] font-bold uppercase tracking-widest opacity-60 mb-1">Overall Adherence</p>
-                        <h5 class="text-4xl font-display font-bold" id="doc-avg-adherence">--%</h5>
+        <!-- Task 20: Intelligent Alerts -->
+        <div class="card-white p-8 mb-12">
+            <div class="flex items-center justify-between mb-8">
+                <h4 class="text-lg font-display font-bold text-slate-800 flex items-center gap-2">
+                    <i data-lucide="bell-ring" class="text-rose-500 w-5 h-5"></i> Critical Care Alerts
+                </h4>
+            </div>
+            <div id="doctor-alerts" class="space-y-4">
+                <div class="animate-pulse flex space-x-4">
+                    <div class="rounded-full bg-slate-100 h-10 w-10"></div>
+                    <div class="flex-1 space-y-2 py-1">
+                        <div class="h-2 bg-slate-100 rounded"></div>
+                        <div class="h-2 bg-slate-100 rounded w-5/6"></div>
                     </div>
                 </div>
             </div>
@@ -691,7 +739,11 @@ async function renderDoctorView(container) {
         }));
 
         const overallAvg = Math.round(patientData.reduce((acc, p) => acc + p.adherence, 0) / (patientData.length || 1));
-        document.getElementById('doc-avg-adherence').textContent = overallAvg;
+        const highRiskCount = patientData.filter(p => p.risk === 'High').length;
+        
+        document.getElementById('doc-avg-adherence').textContent = overallAvg + '%';
+        const hrCountEl = document.getElementById('doc-high-risk-count');
+        if (hrCountEl) hrCountEl.textContent = highRiskCount;
 
         const list = document.getElementById('doctor-patient-list');
         list.innerHTML = patientData.map(p => `
@@ -724,7 +776,11 @@ async function renderDoctorView(container) {
                     <span class="px-4 py-1.5 rounded-lg text-[10px] font-bold uppercase tracking-widest ${p.riskColor} ring-1 ring-inset ${p.risk === 'High' ? 'ring-rose-200' : p.risk === 'Medium' ? 'ring-amber-200' : 'ring-emerald-200'}">${p.risk}</span>
                 </td>
                 <td class="px-8 py-6 text-right">
-                    <button class="text-primary font-bold text-sm hover:text-primary-dark transition-colors">View Record</button>
+                    <div class="flex items-center justify-end gap-2">
+                        <button class="px-4 py-2 bg-slate-50 text-slate-600 font-bold rounded-lg text-xs hover:bg-slate-100 transition-all flex items-center gap-1"><i data-lucide="file-text" class="w-3.5 h-3.5"></i> Notes</button>
+                        <button class="px-4 py-2 bg-primary/10 text-primary font-bold rounded-lg text-xs hover:bg-primary hover:text-white transition-all flex items-center gap-1"><i data-lucide="pill" class="w-3.5 h-3.5"></i> Rx</button>
+                        <button class="px-4 py-2 border border-slate-200 text-slate-600 font-bold rounded-lg text-xs hover:border-primary hover:text-primary transition-all flex items-center gap-1"><i data-lucide="folder-open" class="w-3.5 h-3.5"></i> Record</button>
+                    </div>
                 </td>
             </tr>
         `).join('');
@@ -748,17 +804,21 @@ async function renderDoctorView(container) {
             alertsEl.innerHTML = '<p class="text-slate-400 italic text-center py-4">No critical alerts detected today.</p>';
         } else {
             alertsEl.innerHTML = alerts.map(a => `
-                <div onclick="viewPatientFile('${a.patient._id}', '${a.patient.name}')" class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex items-center justify-between cursor-pointer hover:border-rose-200 transition-all group">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 group hover:border-primary/30 transition-all">
                     <div class="flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center">
-                            <i data-lucide="alert-circle"></i>
+                        <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-500 flex items-center justify-center shrink-0">
+                            <i data-lucide="alert-circle" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <p class="text-sm font-bold text-slate-800">${a.msg}</p>
+                            <div class="flex items-center gap-2 mb-1">
+                                <p class="text-sm font-bold text-slate-800">${a.patient.name}</p>
+                                <span class="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-widest ${a.patient.riskColor} ring-1 ring-inset ${a.patient.risk === 'High' ? 'ring-rose-200' : 'ring-amber-200'}">${a.patient.risk} Risk</span>
+                            </div>
+                            <p class="text-xs font-medium text-slate-500">${a.msg}</p>
                             <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">${a.type}</p>
                         </div>
                     </div>
-                    <i data-lucide="chevron-right" class="text-slate-300 group-hover:text-primary transition-all"></i>
+                    <button onclick="viewPatientFile('${a.patient._id}', '${a.patient.name}')" class="px-5 py-2.5 bg-white border border-slate-200 text-slate-700 font-bold text-xs rounded-xl shadow-sm hover:border-primary hover:text-primary transition-all shrink-0">View Record</button>
                 </div>
             `).join('');
         }

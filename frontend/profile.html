@@ -13,6 +13,7 @@
     <link rel="stylesheet" href="/css/style.css">
     <script>
         tailwind.config = {
+            darkMode: 'class',
             theme: {
                 extend: {
                     colors: { primary: '#0ea5e9', secondary: '#10b981', danger: '#ef4444' },
@@ -51,12 +52,12 @@
                     <p id="display-role" class="text-xs font-bold text-primary uppercase tracking-[0.2em] mt-1">Patient
                     </p>
 
-                    <div class="w-full grid grid-cols-2 gap-4 mt-10">
+                    <div id="status-med-container" class="w-full grid grid-cols-2 gap-4 mt-10">
                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Status</p>
                             <p class="text-sm font-bold text-emerald-500">Active</p>
                         </div>
-                        <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
+                        <div id="active-meds-card" class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Meds</p>
                             <p id="display-med-count" class="text-sm font-bold text-slate-800">5 Active</p>
                         </div>
@@ -185,11 +186,21 @@
                 lucide.createIcons();
 
                 // Load live medicine count
-                try {
-                    const meds = await apiFetch('/medicines');
-                    const activeMeds = meds.filter(m => (m.status || 'active') === 'active');
-                    document.getElementById('display-med-count').textContent = `${activeMeds.length} Active`;
-                } catch (e) { /* keep placeholder */ }
+                if (user.role === 'patient') {
+                    try {
+                        const meds = await apiFetch('/medicines');
+                        const activeMeds = meds.filter(m => (m.status || 'active') === 'active');
+                        document.getElementById('display-med-count').textContent = `${activeMeds.length} Active`;
+                    } catch (e) { /* keep placeholder */ }
+                } else {
+                    const amCard = document.getElementById('active-meds-card');
+                    if (amCard) amCard.remove();
+                    const smc = document.getElementById('status-med-container');
+                    if (smc) {
+                        smc.classList.remove('grid-cols-2');
+                        smc.classList.add('grid-cols-1');
+                    }
+                }
 
                 // Logout button
                 document.getElementById('logout-btn')?.addEventListener('click', () => {
