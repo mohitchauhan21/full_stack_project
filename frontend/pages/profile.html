@@ -1,11 +1,14 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Profile - MedRemind Lumina</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@400;500;600;700&display=swap"
+        rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <link rel="stylesheet" href="css/style.css">
     <script>
@@ -19,6 +22,7 @@
         }
     </script>
 </head>
+
 <body>
     <div id="profile-app" class="animate-slide-up">
         <header class="mb-10">
@@ -31,17 +35,22 @@
             <div class="col-span-12 lg:col-span-4">
                 <div class="card-white flex flex-col items-center text-center p-10">
                     <div class="relative mb-6">
-                        <div class="w-32 h-32 rounded-[2.5rem] bg-primary/10 border-4 border-white shadow-xl overflow-hidden p-1">
-                            <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah" alt="Avatar" class="w-full h-full rounded-[2rem] object-cover">
+                        <div
+                            class="w-32 h-32 rounded-[2.5rem] bg-primary/10 border-4 border-white shadow-xl overflow-hidden p-1">
+                            <img id="profile-avatar" src="https://api.dicebear.com/7.x/avataaars/svg?seed=Sarah"
+                                alt="Avatar" class="w-full h-full rounded-[2rem] object-cover">
                         </div>
-                        <button id="camera-btn" class="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-white rounded-xl shadow-lg border-4 border-white flex items-center justify-center hover:scale-110 transition-all" title="Change avatar">
+                        <button id="camera-btn"
+                            class="absolute -bottom-2 -right-2 w-10 h-10 bg-primary text-white rounded-xl shadow-lg border-4 border-white flex items-center justify-center hover:scale-110 transition-all"
+                            title="Change avatar">
                             <i data-lucide="camera" class="w-5 h-5"></i>
                         </button>
                     </div>
-                    
+
                     <h3 id="display-name" class="text-2xl font-display font-bold text-slate-800">Sarah Jenkins</h3>
-                    <p id="display-role" class="text-xs font-bold text-primary uppercase tracking-[0.2em] mt-1">Patient</p>
-                    
+                    <p id="display-role" class="text-xs font-bold text-primary uppercase tracking-[0.2em] mt-1">Patient
+                    </p>
+
                     <div class="w-full grid grid-cols-2 gap-4 mt-10">
                         <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100">
                             <p class="text-[10px] font-bold text-slate-400 uppercase mb-1">Status</p>
@@ -53,7 +62,8 @@
                         </div>
                     </div>
 
-                    <button id="logout-btn" class="w-full py-4 mt-8 bg-rose-50 text-rose-500 font-bold rounded-2xl border border-rose-100 flex items-center justify-center gap-3 hover:bg-rose-500 hover:text-white transition-all group">
+                    <button id="logout-btn"
+                        class="w-full py-4 mt-8 bg-rose-50 text-rose-500 font-bold rounded-2xl border border-rose-100 flex items-center justify-center gap-3 hover:bg-rose-500 hover:text-white transition-all group">
                         <i data-lucide="log-out" class="w-5 h-5 group-hover:-translate-x-1 transition-transform"></i>
                         Logout from Lumina
                     </button>
@@ -65,16 +75,20 @@
                 <div class="card-white">
                     <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-50">
                         <h4 class="text-xl font-display font-bold text-slate-800">Personal Information</h4>
-                        <button id="edit-details-btn" class="text-primary font-bold text-sm uppercase tracking-widest hover:underline">Edit Details</button>
+                        <button id="edit-details-btn"
+                            class="text-primary font-bold text-sm uppercase tracking-widest hover:underline">Edit
+                            Details</button>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
                         <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full Name</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Full
+                                Name</label>
                             <p id="detail-name" class="text-slate-800 font-medium">Sarah Jenkins</p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email Address</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Email
+                                Address</label>
                             <p id="detail-email" class="text-slate-800 font-medium">sarah@lumina.health</p>
                         </div>
                         <div class="space-y-1">
@@ -82,7 +96,8 @@
                             <p id="detail-age" class="text-slate-800 font-medium">28 Years</p>
                         </div>
                         <div class="space-y-1">
-                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Member Since</label>
+                            <label class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Member
+                                Since</label>
                             <p id="detail-joined" class="text-slate-800 font-medium">Jan 12, 2023</p>
                         </div>
                     </div>
@@ -95,7 +110,8 @@
                         </div>
                         <h4 class="text-xl font-display font-bold text-slate-800">Health Verification</h4>
                     </div>
-                    <div id="role-info" class="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
+                    <div id="role-info"
+                        class="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center justify-between">
                         <!-- Role specific info injected here -->
                     </div>
                 </div>
@@ -106,19 +122,24 @@
                 <div class="card-white">
                     <div class="flex items-center justify-between mb-8 pb-6 border-b border-slate-50">
                         <h4 class="text-xl font-display font-bold text-slate-800">Edit Information</h4>
-                        <button id="cancel-edit-btn" class="text-slate-400 font-bold text-sm uppercase tracking-widest hover:underline">Cancel</button>
+                        <button id="cancel-edit-btn"
+                            class="text-slate-400 font-bold text-sm uppercase tracking-widest hover:underline">Cancel</button>
                     </div>
                     <form id="update-profile-form" class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Full Name</label>
-                            <input type="text" id="edit-name" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                            <input type="text" id="edit-name"
+                                class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                         </div>
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Age</label>
-                            <input type="number" id="edit-age" class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
+                            <input type="number" id="edit-age"
+                                class="w-full px-6 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all">
                         </div>
                         <div class="md:col-span-2">
-                            <button type="submit" class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.02] active:scale-[0.98] transition-all">Save Changes</button>
+                            <button type="submit"
+                                class="w-full py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.02] active:scale-[0.98] transition-all">Save
+                                Changes</button>
                         </div>
                     </form>
                 </div>
@@ -139,7 +160,7 @@
                 document.getElementById('detail-age').textContent = `${user.age || '--'} Years`;
                 document.getElementById('display-role').textContent = user.role;
                 document.getElementById('profile-avatar').src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}`;
-                
+
                 const roleInfo = document.getElementById('role-info');
                 if (user.role === 'patient') {
                     roleInfo.innerHTML = `
@@ -173,7 +194,7 @@
                     const meds = await apiFetch('/medicines');
                     const activeMeds = meds.filter(m => (m.status || 'active') === 'active');
                     document.getElementById('display-med-count').textContent = `${activeMeds.length} Active`;
-                } catch(e) { /* keep placeholder */ }
+                } catch (e) { /* keep placeholder */ }
 
                 // Logout button
                 document.getElementById('logout-btn')?.addEventListener('click', () => {
@@ -216,7 +237,7 @@
                         localStorage.setItem('user', JSON.stringify(updatedUser));
                         alert('Profile updated successfully!');
                         window.location.reload();
-                    } catch(err) {
+                    } catch (err) {
                         alert('Failed to update profile. Please try again.');
                         btn.disabled = false;
                         btn.textContent = 'Save Changes';
@@ -226,4 +247,8 @@
         });
     </script>
 </body>
+
+</html>
+</body>
+
 </html>

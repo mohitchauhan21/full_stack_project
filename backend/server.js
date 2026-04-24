@@ -23,9 +23,9 @@ app.use('/api/vitals', require('./routes/vitals'));
 // Serve static files from frontend folder
 app.use(express.static(path.join(__dirname, '../frontend')));
 
-// All other routes should serve the frontend index.html
+// All other routes should serve the frontend pages/index.html
 app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, '../frontend/pages/index.html'));
 });
 
 const PORT = process.env.PORT || 5000;

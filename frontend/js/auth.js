@@ -19,7 +19,7 @@ if (loginForm) {
             if (res && res.token) {
                 localStorage.setItem('token', res.token);
                 localStorage.setItem('user', JSON.stringify(res.user));
-                window.location.href = 'dashboard.html';
+                window.location.href = '/pages/dashboard.html';
             } else {
                 alert(res?.msg || 'Login failed');
             }
@@ -55,7 +55,7 @@ if (registerForm) {
             if (res && res.token) {
                 localStorage.setItem('token', res.token);
                 localStorage.setItem('user', JSON.stringify(res.user));
-                window.location.href = 'dashboard.html';
+                window.location.href = '/pages/dashboard.html';
             } else {
                 alert(res?.msg || 'Registration failed');
             }
