@@ -30,6 +30,7 @@ async function initDoctorMode() {
     if (!container || !select) return;
 
     container.classList.remove('hidden');
+    document.getElementById('notes-container')?.classList.remove('hidden');
     try {
         const patients = await apiFetch('/users/patients');
         patients.forEach(p => {
@@ -138,6 +139,11 @@ async function loadMedicines() {
                                         ${escapeHtml(med.frequency || 'Daily')}
                                     </span>
                                 </div>
+                                ${med.notes ? `
+                                <div class="mt-3 p-3 bg-amber-50/50 rounded-xl border border-amber-100 flex items-start gap-2">
+                                    <i data-lucide="file-text" class="w-4 h-4 text-amber-500 shrink-0 mt-0.5"></i>
+                                    <p class="text-sm font-medium text-amber-800">${escapeHtml(med.notes)}</p>
+                                </div>` : ''}
                             </div>
                         </div>
 
@@ -215,6 +221,7 @@ window.editMedicine = async function(id) {
         document.getElementById('med-dosage').value     = med.dosage || '';
         document.getElementById('med-time').value       = to24h(med.time);
         document.getElementById('med-frequency').value  = med.frequency || 'Daily';
+        if (document.getElementById('med-notes')) document.getElementById('med-notes').value = med.notes || '';
 
         // Show/hide day picker and restore checked days
         toggleDayPicker();
@@ -262,6 +269,7 @@ window.cancelEdit = function() {
         picker.classList.add('hidden');
         picker.querySelectorAll('input[name="day-of-week"]').forEach(cb => cb.checked = false);
     }
+    if (document.getElementById('med-notes')) document.getElementById('med-notes').value = '';
 
     document.getElementById('form-title').textContent = 'Add Medication';
     document.getElementById('form-icon').className = 'w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary';
@@ -284,6 +292,7 @@ async function handleFormSubmit(e) {
     const patientId = document.getElementById('assign-patient')?.value;
     const frequency = document.getElementById('med-frequency')?.value || 'Daily';
     const status    = document.getElementById('med-status')?.value || 'active';
+    const notes     = document.getElementById('med-notes')?.value.trim();
 
     // Collect selected days of week (for Weekly)
     const daysOfWeek = Array.from(
@@ -312,16 +321,22 @@ async function handleFormSubmit(e) {
     try {
         if (editingId) {
             // ── UPDATE ──
+            const payload = { name, time, dosage, frequency, daysOfWeek, status };
+            if (user.role === 'doctor') payload.notes = notes;
+
             await apiFetch(`/medicines/${editingId}`, {
                 method: 'PUT',
-                body: JSON.stringify({ name, time, dosage, frequency, daysOfWeek, status })
+                body: JSON.stringify(payload)
             });
             showFormSuccess('Medication updated successfully!');
             cancelEdit();
         } else {
             // ── CREATE ──
             const data = { name, time, dosage, frequency, daysOfWeek, startDate: new Date().toISOString() };
-            if (user.role === 'doctor' && patientId) data.user = patientId;
+            if (user.role === 'doctor') {
+                if (patientId) data.user = patientId;
+                if (notes) data.notes = notes;
+            }
             await apiFetch('/medicines', { method: 'POST', body: JSON.stringify(data) });
             addMedForm.reset();
             // Reset day picker after form reset

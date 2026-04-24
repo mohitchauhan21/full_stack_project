@@ -59,12 +59,7 @@ function isMedicineDueToday(med) {
 
 async function renderPatientContainer(container) {
     container.innerHTML = `
-        <div class="mb-10">
-            <p class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">Personal Health Dashboard</p>
-            <h2 class="text-4xl font-display font-bold text-slate-800">Hello, <span id="user-name">...</span></h2>
-        </div>
-
-        <!-- Task 8: Next Dose Section -->
+        <!-- Next Dose Section -->
         <div id="next-dose-hero" class="mb-10"></div>
 
         <div class="grid grid-cols-12 gap-8">
@@ -117,11 +112,6 @@ async function renderPatientContainer(container) {
 async function renderPatientView() {
     const now = new Date();
     const dateStr = now.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' });
-    const dateEl = document.getElementById('current-date');
-    if (dateEl) dateEl.textContent = dateStr;
-
-    const nameEl = document.getElementById('user-name');
-    if (nameEl) nameEl.textContent = user.name.split(' ')[0];
 
     try {
         const [meds, logs, stats] = await Promise.all([
@@ -154,34 +144,113 @@ async function renderPatientView() {
             });
 
         // Task 8: Render Hero Section
-        const nextMed = medsWithStatus.find(m => m.status === 'pending');
+        const pendingMeds = medsWithStatus.filter(m => m.status === 'pending');
         const heroEl = document.getElementById('next-dose-hero');
-        if (heroEl && nextMed) {
-            heroEl.innerHTML = `
-                <div class="bg-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-sky-200 group">
-                    <div class="relative z-10 flex items-center justify-between">
-                        <div class="flex items-center gap-8">
-                            <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center">
-                                <i data-lucide="pill" class="w-10 h-10"></i>
+        
+        if (window.countdownInterval) {
+            clearInterval(window.countdownInterval);
+        }
+
+        if (heroEl) {
+            if (medsWithStatus.length === 0) {
+                // Edge Case: If no upcoming dose (no meds today) -> show "No upcoming doses today"
+                heroEl.innerHTML = `
+                    <div class="bg-slate-100 rounded-[2.5rem] p-10 text-slate-500 relative overflow-hidden shadow-sm text-center">
+                        <h3 class="text-3xl font-display font-bold">No upcoming doses today</h3>
+                        <p class="mt-2 opacity-90">You have no medications scheduled for today.</p>
+                    </div>
+                `;
+            } else if (pendingMeds.length === 0) {
+                // Edge Case: If all taken -> keep existing "All caught up"
+                heroEl.innerHTML = `
+                    <div class="bg-emerald-500 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-100 text-center">
+                        <h3 class="text-3xl font-display font-bold">All caught up!</h3>
+                        <p class="mt-2 opacity-90">You've taken all your scheduled medications for today.</p>
+                    </div>
+                `;
+            } else {
+                const nextMed = pendingMeds[0];
+                const isFuture = nextMed.timeMins > currentMins;
+
+                if (!isFuture) {
+                    // Due now or overdue - show the standard "Take Now" blue banner
+                    heroEl.innerHTML = `
+                        <div class="bg-primary rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-sky-200 group">
+                            <div class="relative z-10 flex items-center justify-between">
+                                <div class="flex items-center gap-8">
+                                    <div class="w-20 h-20 bg-white/20 backdrop-blur-md rounded-3xl flex items-center justify-center">
+                                        <i data-lucide="pill" class="w-10 h-10"></i>
+                                    </div>
+                                    <div>
+                                        <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Due Now</p>
+                                        <h3 class="text-4xl font-display font-bold">${nextMed.name}</h3>
+                                        <p class="text-lg mt-1 opacity-90">${nextMed.time} • ${nextMed.dosage || '1 Tablet'}</p>
+                                    </div>
+                                </div>
+                                <button onclick="logMed('${nextMed._id}', 'taken')" class="px-10 py-5 bg-white text-primary font-bold rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all">Take Now</button>
                             </div>
-                            <div>
-                                <p class="text-sm font-bold uppercase tracking-widest opacity-80 mb-1">Upcoming Dose</p>
-                                <h3 class="text-4xl font-display font-bold">${nextMed.name}</h3>
-                                <p class="text-lg mt-1 opacity-90">${nextMed.time} • ${nextMed.dosage || '1 Tablet'}</p>
+                            <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
+                        </div>
+                    `;
+                } else {
+                    // Future dose - show "All caught up" AND countdown below it
+                    heroEl.innerHTML = `
+                        <div class="bg-emerald-500 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-100 text-center mb-6">
+                            <h3 class="text-3xl font-display font-bold">All caught up for now!</h3>
+                            <p class="mt-2 opacity-90">You've taken your scheduled medications so far. Next dose is coming up.</p>
+                        </div>
+                        <div class="bg-white rounded-[2rem] p-6 shadow-lg shadow-slate-100/50 border border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-6 animate-slide-up">
+                            <div class="flex items-center gap-5">
+                                <div class="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center shrink-0">
+                                    <i data-lucide="clock" class="w-7 h-7"></i>
+                                </div>
+                                <div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-0.5">Next Upcoming Dose</p>
+                                    <p class="text-xl font-display font-bold text-slate-800">${nextMed.name} <span class="text-slate-400 text-sm font-sans font-medium ml-1">at ${nextMed.time}</span></p>
+                                </div>
+                            </div>
+                            <div class="px-6 py-4 bg-slate-50 rounded-2xl border border-slate-100 shrink-0 w-full sm:w-auto text-center">
+                                <p id="countdown-timer" class="text-lg font-display font-bold text-primary tracking-wide font-mono">Next dose in: --h --m --s</p>
                             </div>
                         </div>
-                        <button onclick="logMed('${nextMed._id}', 'taken')" class="px-10 py-5 bg-white text-primary font-bold rounded-2xl shadow-xl hover:scale-105 active:scale-95 transition-all">Take Now</button>
-                    </div>
-                    <div class="absolute -right-20 -top-20 w-64 h-64 bg-white/10 rounded-full blur-3xl"></div>
-                </div>
-            `;
-        } else if (heroEl) {
-            heroEl.innerHTML = `
-                <div class="bg-emerald-500 rounded-[2.5rem] p-10 text-white relative overflow-hidden shadow-2xl shadow-emerald-100 text-center">
-                    <h3 class="text-3xl font-display font-bold">All caught up for now!</h3>
-                    <p class="mt-2 opacity-90">You've taken all your scheduled medications so far today.</p>
-                </div>
-            `;
+                    `;
+
+                    // Start the countdown
+                    const [timeStr, modifier] = nextMed.time.split(' ');
+                    let [hrs, mins] = timeStr.split(':');
+                    if (hrs === '12') hrs = '00';
+                    if (modifier === 'PM') hrs = parseInt(hrs, 10) + 12;
+
+                    const updateTimer = () => {
+                        const targetTime = new Date();
+                        targetTime.setHours(parseInt(hrs, 10), parseInt(mins, 10), 0, 0);
+                        const now = new Date();
+                        const diffMs = targetTime - now;
+                        const timerEl = document.getElementById('countdown-timer');
+                        
+                        if (!timerEl) {
+                            clearInterval(window.countdownInterval);
+                            return;
+                        }
+
+                        if (diffMs <= 0) {
+                            timerEl.textContent = "Due now!";
+                            clearInterval(window.countdownInterval);
+                            renderPatientView(); // Re-render to show the "Due Now" blue banner
+                            return;
+                        }
+
+                        const h = Math.floor(diffMs / (1000 * 60 * 60));
+                        const m = Math.floor((diffMs % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diffMs % (1000 * 60)) / 1000);
+                        
+                        timerEl.textContent = `Next dose in: ${String(h).padStart(2, '0')}h ${String(m).padStart(2, '0')}m ${String(s).padStart(2, '0')}s`;
+                    };
+
+                    updateTimer(); // run immediately
+                    window.countdownInterval = setInterval(updateTimer, 1000);
+                }
+            }
         }
 
         // Task 4 & 10: Render Schedule

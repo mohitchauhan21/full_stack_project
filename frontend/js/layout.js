@@ -73,25 +73,31 @@ const renderSidebar = () => {
     const mainContent = document.createElement('main');
     mainContent.className = 'main-content';
     
-    // Task 35: Standard Header
+    const greetingLabel = user.role === 'doctor'
+        ? 'Clinical Control Center'
+        : user.role === 'caregiver'
+        ? 'Caregiver Hub'
+        : 'Personal Health Dashboard';
+
+    const showGreeting = isPage('dashboard');
+
     const standardHeader = `
-        <header class="flex items-center justify-between mb-12 animate-fade-in">
-            <div class="relative hidden lg:block">
-                <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-300"></i>
-                <input type="text" placeholder="Search medical records..." class="pl-12 pr-6 py-4 bg-white border border-slate-100 rounded-2xl w-96 outline-none focus:ring-4 focus:ring-primary/5 transition-all shadow-sm">
+        <header class="flex items-center ${showGreeting ? 'justify-between' : 'justify-end'} mb-6 animate-fade-in">
+            ${showGreeting ? `
+            <div>
+                <p class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">${greetingLabel}</p>
+                <h2 class="text-3xl font-display font-bold text-slate-800">Hello, <span class="text-primary">${user.name.split(' ')[0]}</span></h2>
             </div>
-            
-            <div class="flex items-center gap-6">
-                <a href="/profile.html" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
-                    <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-slate-800">${user.name}</p>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${user.role}</p>
-                    </div>
-                    <div class="w-12 h-12 rounded-2xl bg-white border-2 border-white shadow-md overflow-hidden hover:scale-105 transition-all cursor-pointer">
-                        <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}" class="w-full h-full object-cover">
-                    </div>
-                </a>
-            </div>
+            ` : ''}
+            <a href="/profile.html" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
+                <div class="text-right hidden sm:block">
+                    <p class="text-sm font-bold text-slate-800">${user.name}</p>
+                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${user.role}</p>
+                </div>
+                <div class="w-12 h-12 rounded-2xl bg-white border-2 border-white shadow-md overflow-hidden hover:scale-105 transition-all cursor-pointer">
+                    <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}" class="w-full h-full object-cover">
+                </div>
+            </a>
         </header>
     `;
 

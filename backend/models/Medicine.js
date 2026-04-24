@@ -10,6 +10,7 @@ const MedicineSchema = new mongoose.Schema({
     daysOfWeek: { type: [Number], default: [] },
     // For 'Every Other Day': the reference start date to calculate alternation
     startDate: { type: Date, default: Date.now },
+    notes: { type: String },
     status: { type: String, enum: ['active', 'on hold', 'completed'], default: 'active' },
     date: { type: Date, default: Date.now }
 });

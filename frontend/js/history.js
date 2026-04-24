@@ -1,5 +1,7 @@
 document.addEventListener('DOMContentLoaded', loadHistory);
 
+let selectedCalendarDate = null;
+
 async function loadHistory() {
     const user = JSON.parse(localStorage.getItem('user'));
     const historyList = document.getElementById('history-list');
@@ -27,6 +29,9 @@ async function loadHistory() {
             logs = await apiFetch('/logs');
         }
 
+        // Render Calendar & Streak BEFORE filtering logs
+        renderCalendarAndStreak(logs);
+
         // Apply Filters (Task 13)
         const nameFilter = document.getElementById('filter-name')?.value.toLowerCase();
         const statusFilter = document.getElementById('filter-status')?.value;
@@ -42,7 +47,17 @@ async function loadHistory() {
             filtered = filtered.filter(l => l.status === statusFilter);
         }
 
-        if (dateFilter && dateFilter !== 'all') {
+        if (selectedCalendarDate) {
+            // Feature 2: Filter by specific calendar date
+            filtered = filtered.filter(l => {
+                const logDate = new Date(l.date);
+                const localDateStr = new Date(logDate.getTime() - (logDate.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+                return localDateStr === selectedCalendarDate;
+            });
+            // Clear the dropdown date filter visually
+            const df = document.getElementById('filter-date');
+            if (df) df.value = 'all';
+        } else if (dateFilter && dateFilter !== 'all') {
             const now = new Date();
             filtered = filtered.filter(l => {
                 const logDate = new Date(l.date);
@@ -125,7 +140,6 @@ async function loadHistory() {
         });
         lucide.createIcons();
     } catch (err) {
-        // Task 11: Fix error message
         historyList.innerHTML = `
             <tr>
                 <td colspan="4" class="px-8 py-20 text-center text-rose-500 font-bold">
@@ -135,6 +149,135 @@ async function loadHistory() {
         `;
     }
 }
+
+function renderCalendarAndStreak(allLogs) {
+    // 1. Group logs by local YYYY-MM-DD
+    const logsByDay = {};
+    allLogs.forEach(l => {
+        const d = new Date(l.date);
+        const dateStr = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        if (!logsByDay[dateStr]) logsByDay[dateStr] = [];
+        logsByDay[dateStr].push(l);
+    });
+
+    // 2. Generate last 30 days
+    const days = [];
+    const today = new Date();
+    
+    let currentStreak = 0;
+    let longestStreak = 0;
+    let tempStreak = 0;
+    let isCurrentStreakActive = true;
+
+    // Go backwards from today to 365 days ago for streak calculation, but only show 30 days in calendar
+    const CALENDAR_DAYS = 30;
+    const STREAK_DAYS = 365;
+
+    for (let i = 0; i < STREAK_DAYS; i++) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const dateStr = new Date(d.getTime() - (d.getTimezoneOffset() * 60000)).toISOString().split('T')[0];
+        
+        const dayLogs = logsByDay[dateStr] || [];
+        
+        let status = 'gray'; // no data
+        if (dayLogs.length > 0) {
+            const hasSkipped = dayLogs.some(l => l.status === 'skipped');
+            if (hasSkipped) {
+                status = 'red';
+            } else {
+                const hasTaken = dayLogs.some(l => l.status === 'taken');
+                if (hasTaken) status = 'green';
+            }
+        }
+
+        // Streak logic
+        // "A day counts only if: ALL scheduled medicines were taken" -> represented by 'green'
+        if (status === 'green') {
+            tempStreak++;
+            if (isCurrentStreakActive) currentStreak++;
+        } else if (status === 'red' || status === 'gray') {
+            // Do not break the current streak if today has no data yet
+            if (i === 0 && status === 'gray') {
+                // Ignore today if no data yet, keep streak active from yesterday
+            } else {
+                isCurrentStreakActive = false;
+                if (tempStreak > longestStreak) longestStreak = tempStreak;
+                tempStreak = 0;
+            }
+        }
+
+        if (i < CALENDAR_DAYS) {
+            days.push({
+                dateObj: d,
+                dateStr: dateStr,
+                status: status,
+                dayName: d.toLocaleDateString('en-US', { weekday: 'short' }),
+                dayNum: d.getDate()
+            });
+        }
+    }
+    
+    // Final check for longest streak
+    if (tempStreak > longestStreak) longestStreak = tempStreak;
+
+    // Update Streak UI
+    const currentEl = document.getElementById('current-streak');
+    const longestEl = document.getElementById('longest-streak');
+    if (currentEl) currentEl.innerHTML = `${currentStreak} <span class="text-xl font-medium text-orange-300">days</span>`;
+    if (longestEl) longestEl.textContent = `${longestStreak} days`;
+
+    // Render Calendar UI
+    const gridEl = document.getElementById('calendar-grid');
+    if (gridEl) {
+        // Reverse so chronological left to right
+        gridEl.innerHTML = days.reverse().map(d => {
+            let bgClass = 'bg-slate-50 border-slate-100 text-slate-400';
+            let iconClass = 'opacity-0';
+            if (d.status === 'green') {
+                bgClass = 'bg-emerald-50 border-emerald-200 text-emerald-600';
+                iconClass = 'text-emerald-500 opacity-100';
+            } else if (d.status === 'red') {
+                bgClass = 'bg-rose-50 border-rose-200 text-rose-600';
+                iconClass = 'text-rose-500 opacity-100';
+            }
+
+            const isSelected = selectedCalendarDate === d.dateStr;
+            const ringClass = isSelected ? 'ring-2 ring-primary ring-offset-2 scale-105' : '';
+
+            return `
+                <button onclick="filterByCalendarDate('${d.dateStr}')" 
+                        class="flex flex-col items-center justify-center min-w-[4rem] h-[5rem] rounded-xl border ${bgClass} ${ringClass} hover:scale-105 transition-all snap-end shrink-0 relative overflow-hidden group">
+                    <span class="text-[10px] font-bold uppercase tracking-widest mb-1 opacity-70">${d.dayName}</span>
+                    <span class="text-xl font-display font-bold">${d.dayNum}</span>
+                    <i data-lucide="${d.status === 'green' ? 'check-circle' : 'x-circle'}" class="absolute bottom-1 right-1 w-3 h-3 ${iconClass}"></i>
+                </button>
+            `;
+        }).join('');
+        
+        lucide.createIcons();
+        
+        // Scroll to end (right) to show most recent dates
+        setTimeout(() => {
+            gridEl.scrollLeft = gridEl.scrollWidth;
+        }, 50);
+    }
+}
+
+// Global click handler to apply calendar filter
+window.filterByCalendarDate = (dateStr) => {
+    if (selectedCalendarDate === dateStr) {
+        selectedCalendarDate = null; // toggle off
+    } else {
+        selectedCalendarDate = dateStr;
+    }
+    loadHistory();
+};
+
+window.applyManualFilters = () => {
+    selectedCalendarDate = null; // Clear calendar selection
+    loadHistory();
+};
 
 // Task 16: Export Functionality
 async function exportHistory() {
