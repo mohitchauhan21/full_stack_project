@@ -86,7 +86,7 @@
         overlay.innerHTML = `
             <div
                 id="med-alert-card-${med._id}"
-                class="relative w-full max-w-sm bg-white rounded-[2rem] shadow-2xl overflow-hidden"
+                class="relative w-full max-w-sm bg-white rounded-[2rem] shadow-2xl dark:shadow-none overflow-hidden"
                 style="animation: slideUpAlert 0.35s cubic-bezier(.16,1,.3,1)"
             >
                 <!-- Accent bar -->
@@ -108,19 +108,19 @@
                             <p class="text-[10px] font-black text-sky-500 uppercase tracking-[0.2em] mb-0.5">
                                 ${isSnooze ? 'Snooze Over – Medicine Due' : 'Time to Take Your Medicine'}
                             </p>
-                            <h3 class="text-2xl font-display font-bold text-slate-800">${med.name}</h3>
+                            <h3 class="text-2xl font-display font-bold text-slate-800 dark:text-slate-100">${med.name}</h3>
                         </div>
                     </div>
 
                     <!-- Details -->
                     <div class="flex gap-3 mb-8">
-                        <span class="px-4 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-500 border border-slate-100">
+                        <span class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 dark:text-slate-500 border border-transparent dark:border-slate-700">
                             🕐 ${med.time}
                         </span>
-                        <span class="px-4 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-500 border border-slate-100">
+                        <span class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 dark:text-slate-500 border border-transparent dark:border-slate-700">
                             💊 ${med.dosage || '1 Tablet'}
                         </span>
-                        <span class="px-4 py-2 bg-slate-50 rounded-xl text-xs font-bold text-slate-500 border border-slate-100">
+                        <span class="px-4 py-2 bg-slate-50 dark:bg-slate-900/50 rounded-xl text-xs font-bold text-slate-500 dark:text-slate-400 dark:text-slate-500 border border-transparent dark:border-slate-700">
                             🔁 ${med.frequency || 'Daily'}
                         </span>
                     </div>
@@ -129,7 +129,7 @@
                     <div class="flex gap-3">
                         <button
                             id="taken-btn-${med._id}"
-                            class="flex-1 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg shadow-emerald-100
+                            class="flex-1 py-4 bg-emerald-500 text-white font-bold rounded-2xl shadow-lg dark:shadow-none shadow-emerald-100
                                    hover:bg-emerald-600 active:scale-95 transition-all flex items-center justify-center gap-2"
                         >
                             <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none"
@@ -176,7 +176,7 @@
 
             // Show a brief success toast
             const toast = document.createElement('div');
-            toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 bg-emerald-500 text-white font-bold rounded-2xl shadow-xl text-sm flex items-center gap-2';
+            toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 bg-emerald-500 text-white font-bold rounded-2xl shadow-xl dark:shadow-none text-sm flex items-center gap-2';
             toast.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2.5">
@@ -197,7 +197,7 @@
 
             // Show a snooze confirmation toast
             const toast = document.createElement('div');
-            toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 bg-amber-500 text-white font-bold rounded-2xl shadow-xl text-sm flex items-center gap-2';
+            toast.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[9999] px-6 py-3 bg-amber-500 text-white font-bold rounded-2xl shadow-xl dark:shadow-none text-sm flex items-center gap-2';
             toast.innerHTML = `
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24"
                     stroke="currentColor" stroke-width="2">

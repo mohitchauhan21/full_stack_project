@@ -34,10 +34,10 @@ const renderSidebar = () => {
         <div class="sidebar">
             <div class="mb-12 px-4">
                 <a href="/dashboard.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
-                    <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
+                    <div class="w-10 h-10 bg-primary dark:bg-sky-600 dark:bg-sky-600 rounded-xl flex items-center justify-center text-white shadow-sm dark:shadow-none">
                         <i data-lucide="activity" class="w-6 h-6"></i>
                     </div>
-                    <h1 class="text-2xl font-display font-bold text-slate-800 tracking-tight">MedRemind</h1>
+                    <h1 class="text-2xl font-display font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100 tracking-tight">MedRemind</h1>
                 </a>
             </div>
 
@@ -52,7 +52,7 @@ const renderSidebar = () => {
 
             <div class="mt-auto px-4">
                 
-                <button id="global-logout" class="w-full flex items-center justify-center gap-3 py-4 text-slate-500 hover:text-danger hover:bg-rose-50 rounded-2xl transition-all text-sm font-bold">
+                <button id="global-logout" class="w-full flex items-center justify-center gap-3 py-4 text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 hover:text-danger hover:bg-rose-50 rounded-2xl transition-all text-sm font-bold">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
                     Logout
                 </button>
@@ -100,20 +100,20 @@ const renderSidebar = () => {
             ${showGreeting ? `
             <div>
                 <p class="text-[10px] font-bold text-primary uppercase tracking-[0.2em] mb-1">${greetingLabel}</p>
-                <h2 class="text-3xl font-display font-bold text-slate-800">Hello, <span class="text-primary">${greetingName}</span></h2>
+                <h2 class="text-3xl font-display font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100">Hello, <span class="text-primary">${greetingName}</span></h2>
             </div>
             ` : ''}
             <div class="flex items-center gap-4">
-                <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm border border-slate-100 dark:border-slate-700">
+                <button id="theme-toggle" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-50 dark:bg-slate-900/50 dark:bg-slate-900/50 dark:bg-slate-800 text-slate-600 dark:text-slate-300 dark:text-slate-300 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 transition-all shadow-sm dark:shadow-none border border-transparent dark:border-slate-700 dark:border-slate-700 dark:border-slate-700">
                     <i data-lucide="moon" class="w-5 h-5 block dark:hidden"></i>
                     <i data-lucide="sun" class="w-5 h-5 hidden dark:block text-amber-500"></i>
                 </button>
                 <a href="/profile.html" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                     <div class="text-right hidden sm:block">
-                        <p class="text-sm font-bold text-slate-800 dark:text-white">${user.name}</p>
-                        <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${user.role}</p>
+                        <p class="text-sm font-bold text-slate-800 dark:text-slate-100 dark:text-slate-100 dark:text-white">${user.name}</p>
+                        <p class="text-[10px] font-bold text-slate-400 dark:text-slate-500 dark:text-slate-500 dark:text-slate-400 dark:text-slate-500 uppercase tracking-widest">${user.role}</p>
                     </div>
-                    <div class="w-12 h-12 rounded-2xl bg-white border-2 border-white shadow-md overflow-hidden hover:scale-105 transition-all cursor-pointer">
+                    <div class="w-12 h-12 rounded-2xl bg-white border-2 border-white shadow-md dark:shadow-none overflow-hidden hover:scale-105 transition-all cursor-pointer">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}" class="w-full h-full object-cover">
                     </div>
                 </a>

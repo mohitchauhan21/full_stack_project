@@ -9,7 +9,7 @@ async function loadHistory() {
     // Task 14: Loading State
     historyList.innerHTML = `
         <tr>
-            <td colspan="4" class="px-8 py-20 text-center text-slate-400">
+            <td colspan="4" class="px-8 py-20 text-center text-slate-400 dark:text-slate-500">
                 <div class="flex flex-col items-center gap-4">
                     <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                     <p class="font-medium">Syncing history logs...</p>
@@ -82,7 +82,7 @@ async function loadHistory() {
         if (filtered.length === 0) {
             historyList.innerHTML = `
                 <tr>
-                    <td colspan="4" class="px-8 py-20 text-center text-slate-400">
+                    <td colspan="4" class="px-8 py-20 text-center text-slate-400 dark:text-slate-500">
                         <div class="flex flex-col items-center gap-4">
                             <i data-lucide="database-zap" class="w-12 h-12 opacity-10"></i>
                             <p class="font-medium italic">No history available for the selected filters</p>
@@ -103,13 +103,13 @@ async function loadHistory() {
 
             const isTaken = log.status === 'taken';
             const row = document.createElement('tr');
-            row.className = 'hover:bg-slate-50/50 transition-all group';
+            row.className = 'hover:bg-slate-50 dark:hover:bg-slate-800 transition-all group';
 
             row.innerHTML = `
                 <td class="px-8 py-6">
                     <div class="flex flex-col">
-                        <span class="text-sm font-bold text-slate-800">${dateStr}</span>
-                        <span class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">${timeStr}</span>
+                        <span class="text-sm font-bold text-slate-800 dark:text-slate-100">${dateStr}</span>
+                        <span class="text-[10px] text-slate-400 dark:text-slate-500 font-bold uppercase tracking-widest mt-1">${timeStr}</span>
                     </div>
                 </td>
                 <td class="px-8 py-6">
@@ -117,7 +117,7 @@ async function loadHistory() {
                         <div class="w-10 h-10 rounded-xl ${isTaken ? 'bg-emerald-50 text-emerald-500' : 'bg-rose-50 text-rose-500'} flex items-center justify-center shrink-0">
                             <i data-lucide="${isTaken ? 'check' : 'alert-circle'}" class="w-5 h-5"></i>
                         </div>
-                        <span class="font-bold text-slate-700">${log.medicine ? log.medicine.name : 'System Log'}</span>
+                        <span class="font-bold text-slate-700 dark:text-slate-200">${log.medicine ? log.medicine.name : 'System Log'}</span>
                     </div>
                 </td>
                 <td class="px-8 py-6">
@@ -129,10 +129,10 @@ async function loadHistory() {
                     ${isClinical ? `
                         <div class="flex items-center justify-end gap-2">
                             <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${log.user?.name || 'User'}" class="w-6 h-6 rounded-full bg-slate-100">
-                            <span class="text-xs font-bold text-slate-600">${log.user?.name || 'Unknown'}</span>
+                            <span class="text-xs font-bold text-slate-600 dark:text-slate-300">${log.user?.name || 'Unknown'}</span>
                         </div>
                     ` : `
-                        <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Self Action</span>
+                        <span class="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">Self Action</span>
                     `}
                 </td>
             `;
@@ -239,7 +239,7 @@ function renderCalendarAndStreak(allLogs) {
     if (gridEl) {
         // Reverse so chronological left to right
         gridEl.innerHTML = days.reverse().map(d => {
-            let bgClass = 'bg-slate-50 border-slate-100 text-slate-400';
+            let bgClass = 'bg-slate-50 dark:bg-slate-900/50 border-transparent dark:border-slate-700 text-slate-400 dark:text-slate-500';
             let iconClass = 'opacity-0';
             if (d.status === 'green') {
                 bgClass = 'bg-emerald-50 border-emerald-200 text-emerald-600';

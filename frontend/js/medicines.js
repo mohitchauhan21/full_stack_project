@@ -60,12 +60,12 @@ window.setFilter = function(filter) {
     ['active', 'onhold', 'completed', 'all'].forEach(id => {
         const btn = document.getElementById(`filter-${id}`);
         if (!btn) return;
-        btn.className = 'px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-400 border border-slate-100 hover:border-primary/30 transition-all';
+        btn.className = 'px-5 py-2.5 rounded-xl text-sm font-bold bg-white text-slate-400 dark:text-slate-500 border border-transparent dark:border-slate-700 hover:border-primary/30 transition-all';
     });
 
     const activeMap = { 'active': 'filter-active', 'on hold': 'filter-onhold', 'completed': 'filter-completed', 'all': 'filter-all' };
     const activeBtn = document.getElementById(activeMap[filter]);
-    if (activeBtn) activeBtn.className = 'px-5 py-2.5 rounded-xl text-sm font-bold bg-primary text-white transition-all';
+    if (activeBtn) activeBtn.className = 'px-5 py-2.5 rounded-xl text-sm font-bold bg-primary dark:bg-sky-600 text-white transition-all';
 
     loadMedicines();
 };
@@ -102,7 +102,7 @@ async function loadMedicines() {
 
         if (filtered.length === 0) {
             medicineList.innerHTML = `
-                <div class="card-white flex flex-col items-center justify-center py-20 text-slate-400">
+                <div class="card-white flex flex-col items-center justify-center py-20 text-slate-400 dark:text-slate-500">
                     <i data-lucide="package-open" class="w-16 h-16 mb-4 opacity-10"></i>
                     <p class="text-lg font-display font-bold">No ${currentFilter === 'all' ? '' : currentFilter} medications</p>
                     <p class="text-sm mt-1">Use the form to add a new prescription.</p>
@@ -115,7 +115,7 @@ async function loadMedicines() {
             const statusMap = {
                 'active':    { cls: 'bg-emerald-100 text-emerald-700', label: 'Active' },
                 'on hold':   { cls: 'bg-amber-100 text-amber-700',    label: 'On Hold' },
-                'completed': { cls: 'bg-slate-100 text-slate-500',    label: 'Completed' },
+                'completed': { cls: 'bg-slate-100 text-slate-500 dark:text-slate-400 dark:text-slate-500',    label: 'Completed' },
             };
             const s = statusMap[med.status || 'active'] || statusMap['active'];
 
@@ -125,25 +125,25 @@ async function loadMedicines() {
                     <div class="flex items-start justify-between gap-4">
                         <!-- Info -->
                         <div class="flex items-start gap-4 flex-1 min-w-0">
-                            <div class="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                            <div class="w-12 h-12 rounded-2xl bg-primary/10 text-primary dark:bg-sky-600/10 dark:text-sky-400 flex items-center justify-center shrink-0">
                                 <i data-lucide="pill" class="w-6 h-6"></i>
                             </div>
                             <div class="min-w-0">
                                 <div class="flex items-center gap-2 flex-wrap mb-1">
-                                    <h4 class="text-lg font-display font-bold text-slate-800">${escapeHtml(med.name)}</h4>
+                                    <h4 class="text-lg font-display font-bold text-slate-800 dark:text-slate-100">${escapeHtml(med.name)}</h4>
                                     <span class="px-2 py-0.5 ${s.cls} text-[10px] font-bold uppercase rounded-md">${s.label}</span>
                                 </div>
-                                <div class="flex items-center gap-4 text-sm text-slate-500 flex-wrap">
+                                <div class="flex items-center gap-4 text-sm text-slate-500 dark:text-slate-400 flex-wrap">
                                     <span class="flex items-center gap-1">
-                                        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-300"></i>
+                                        <i data-lucide="clock" class="w-3.5 h-3.5 text-slate-400"></i>
                                         ${escapeHtml(med.time)}
                                     </span>
                                     ${med.dosage ? `<span class="flex items-center gap-1">
-                                        <i data-lucide="activity" class="w-3.5 h-3.5 text-slate-300"></i>
+                                        <i data-lucide="activity" class="w-3.5 h-3.5 text-slate-400"></i>
                                         ${escapeHtml(med.dosage)}
                                     </span>` : ''}
                                     <span class="flex items-center gap-1">
-                                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-300"></i>
+                                        <i data-lucide="calendar" class="w-3.5 h-3.5 text-slate-400"></i>
                                         ${escapeHtml(med.frequency || 'Daily')}
                                     </span>
                                 </div>
@@ -158,17 +158,17 @@ async function loadMedicines() {
                         <!-- Actions -->
                         <div class="flex items-center gap-2 shrink-0">
                             <button onclick="editMedicine('${med._id}')"
-                                class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-primary/10 hover:text-primary transition-all"
+                                class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center hover:bg-primary dark:hover:bg-sky-500 hover:text-white dark:hover:text-white transition-all"
                                 title="Edit">
                                 <i data-lucide="pencil" class="w-4 h-4"></i>
                             </button>
                             <button onclick="toggleStatus('${med._id}', '${med.status || 'active'}')"
-                                class="w-9 h-9 rounded-xl bg-slate-50 text-slate-400 flex items-center justify-center hover:bg-amber-50 hover:text-amber-500 transition-all"
+                                class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 text-slate-400 dark:text-slate-500 flex items-center justify-center hover:bg-amber-50 dark:hover:bg-amber-500/20 hover:text-amber-500 dark:hover:text-amber-400 transition-all"
                                 title="${med.status === 'active' ? 'Pause' : 'Activate'}">
                                 <i data-lucide="${med.status === 'active' ? 'pause' : 'play'}" class="w-4 h-4"></i>
                             </button>
                             <button onclick="deleteMedicine('${med._id}')"
-                                class="w-9 h-9 rounded-xl bg-slate-50 text-rose-400 flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all"
+                                class="w-9 h-9 rounded-xl bg-slate-50 dark:bg-slate-800 text-rose-400 flex items-center justify-center hover:bg-rose-500 dark:hover:bg-rose-600 hover:text-white dark:hover:text-white transition-all"
                                 title="Delete">
                                 <i data-lucide="trash-2" class="w-4 h-4"></i>
                             </button>
@@ -183,7 +183,7 @@ async function loadMedicines() {
             <div class="card-white py-12 text-center text-rose-500 font-bold">
                 <i data-lucide="wifi-off" class="w-10 h-10 mx-auto mb-3 opacity-40"></i>
                 <p>Failed to load medicines.</p>
-                <button onclick="loadMedicines()" class="mt-4 px-6 py-2 bg-primary text-white rounded-xl text-sm font-bold">Retry</button>
+                <button onclick="loadMedicines()" class="mt-4 px-6 py-2 bg-primary dark:bg-sky-600 text-white rounded-xl text-sm font-bold">Retry</button>
             </div>`;
         lucide.createIcons();
     }
@@ -252,7 +252,7 @@ window.editMedicine = async function(id) {
 
         const submitBtn = document.getElementById('submit-btn');
         submitBtn.innerHTML = '<i data-lucide="save" class="w-5 h-5"></i> Save Changes';
-        submitBtn.className = 'flex-1 py-4 bg-amber-500 text-white font-bold rounded-2xl shadow-lg hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2';
+        submitBtn.className = 'flex-1 py-4 bg-amber-500 text-white font-bold rounded-2xl shadow-lg dark:shadow-none hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2';
         lucide.createIcons();
 
         document.getElementById('cancel-edit-btn').classList.remove('hidden');
@@ -280,12 +280,12 @@ window.cancelEdit = function() {
     if (document.getElementById('med-notes')) document.getElementById('med-notes').value = '';
 
     document.getElementById('form-title').textContent = 'Add Medication';
-    document.getElementById('form-icon').className = 'w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary';
+    document.getElementById('form-icon').className = 'w-14 h-14 rounded-2xl bg-primary dark:bg-sky-600/10 flex items-center justify-center text-primary';
     document.getElementById('form-icon').innerHTML = '<i data-lucide="plus" class="w-7 h-7"></i>';
 
     const submitBtn = document.getElementById('submit-btn');
     submitBtn.innerHTML = '<i data-lucide="plus" class="w-5 h-5"></i> Add Medication';
-    submitBtn.className = 'flex-1 py-4 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-sky-100 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2';
+    submitBtn.className = 'flex-1 py-4 bg-primary dark:bg-sky-600 text-white font-bold rounded-2xl shadow-sm hover:shadow-md transition-all border border-primary dark:shadow-none dark:border-sky-600 hover:scale-[1.01] active:scale-[0.99] transition-all flex items-center justify-center gap-2';
     lucide.createIcons();
 };
 
@@ -372,7 +372,7 @@ function showToast(msg, color) {
     document.getElementById('med-toast')?.remove();
     const toast = document.createElement('div');
     toast.id = 'med-toast';
-    toast.className = `fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-4 bg-${color}-500 text-white font-bold rounded-2xl shadow-xl text-sm transition-all`;
+    toast.className = `fixed top-6 left-1/2 -translate-x-1/2 z-[200] px-6 py-4 bg-${color}-500 text-white font-bold rounded-2xl shadow-xl dark:shadow-none text-sm transition-all`;
     toast.textContent = msg;
     document.body.appendChild(toast);
     setTimeout(() => toast.remove(), 3000);
@@ -421,7 +421,7 @@ window.deleteMedicine = async function(id) {
         <span class="text-sm text-rose-700 font-semibold">Delete this medication?</span>
         <div class="flex gap-2">
             <button onclick="deleteMedicine('${id}')" class="px-4 py-1.5 bg-rose-500 text-white text-sm font-bold rounded-lg hover:bg-rose-600 transition-all">Yes, Delete</button>
-            <button onclick="document.getElementById('confirm-${id}').remove()" class="px-4 py-1.5 bg-white text-slate-500 text-sm font-bold rounded-lg border border-slate-200 hover:bg-slate-50 transition-all">Cancel</button>
+            <button onclick="document.getElementById('confirm-${id}').remove()" class="px-4 py-1.5 bg-white text-slate-500 dark:text-slate-400 dark:text-slate-500 text-sm font-bold rounded-lg border border-transparent dark:border-slate-700 hover:bg-slate-50 dark:bg-slate-900/50 transition-all">Cancel</button>
         </div>`;
     card.appendChild(confirmBar);
 };
