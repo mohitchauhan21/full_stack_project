@@ -27,6 +27,36 @@ window.initDashboard = async function initDashboard() {
 
 window.renderPatientView = renderPatientView;
 
+/**
+ * Returns true if a medicine should appear in today's schedule based on its frequency.
+ * - Daily / Twice Daily / As Needed: always show
+ * - Every Other Day: alternates based on startDate
+ * - Weekly: only on the selected daysOfWeek (0=Sun … 6=Sat)
+ */
+function isMedicineDueToday(med) {
+    const freq = (med.frequency || 'Daily').toLowerCase();
+    const todayDay = new Date().getDay(); // 0=Sun, 6=Sat
+
+    if (freq === 'weekly') {
+        // daysOfWeek: e.g. [1, 3, 5] for Mon/Wed/Fri
+        const days = Array.isArray(med.daysOfWeek) ? med.daysOfWeek : [];
+        return days.includes(todayDay);
+    }
+
+    if (freq === 'every other day') {
+        // Calculate based on how many days since startDate
+        const start = new Date(med.startDate || med.date || Date.now());
+        const startMidnight = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+        const todayMidnight = new Date();
+        todayMidnight.setHours(0, 0, 0, 0);
+        const diffDays = Math.round((todayMidnight - startMidnight) / (1000 * 60 * 60 * 24));
+        return diffDays % 2 === 0;
+    }
+
+    // Daily, Twice Daily, As Needed — always show
+    return true;
+}
+
 async function renderPatientContainer(container) {
     container.innerHTML = `
         <div class="mb-10">
@@ -112,14 +142,16 @@ async function renderPatientView() {
         };
         const currentMins = now.getHours() * 60 + now.getMinutes();
 
-        const medsWithStatus = meds.map(med => {
-            const log = todayLogs.find(l => l.medicine?._id === med._id || l.medicine === med._id);
-            return { ...med, status: log ? log.status : 'pending', timeMins: timeToMinutes(med.time) };
-        }).sort((a, b) => {
-            if (a.status === 'pending' && b.status !== 'pending') return -1;
-            if (a.status !== 'pending' && b.status === 'pending') return 1;
-            return a.timeMins - b.timeMins;
-        });
+        const medsWithStatus = meds
+            .filter(med => isMedicineDueToday(med)) // Only show meds due today per frequency
+            .map(med => {
+                const log = todayLogs.find(l => l.medicine?._id === med._id || l.medicine === med._id);
+                return { ...med, status: log ? log.status : 'pending', timeMins: timeToMinutes(med.time) };
+            }).sort((a, b) => {
+                if (a.status === 'pending' && b.status !== 'pending') return -1;
+                if (a.status !== 'pending' && b.status === 'pending') return 1;
+                return a.timeMins - b.timeMins;
+            });
 
         // Task 8: Render Hero Section
         const nextMed = medsWithStatus.find(m => m.status === 'pending');

@@ -6,6 +6,10 @@ const MedicineSchema = new mongoose.Schema({
     dosage: { type: String },
     time: { type: String, required: true },
     frequency: { type: String },
+    // For 'Weekly': array of day numbers (0=Sun, 1=Mon, ... 6=Sat)
+    daysOfWeek: { type: [Number], default: [] },
+    // For 'Every Other Day': the reference start date to calculate alternation
+    startDate: { type: Date, default: Date.now },
     status: { type: String, enum: ['active', 'on hold', 'completed'], default: 'active' },
     date: { type: Date, default: Date.now }
 });

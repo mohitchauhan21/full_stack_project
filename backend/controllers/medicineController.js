@@ -55,7 +55,7 @@ exports.getMedicineById = async (req, res) => {
 // @access   Private
 exports.addMedicine = async (req, res) => {
     try {
-        const { name, dosage, time, frequency, user: targetUserId } = req.body;
+        const { name, dosage, time, frequency, daysOfWeek, startDate, user: targetUserId } = req.body;
         if (!name || !time) return res.status(400).json({ msg: 'Name and time are required' });
 
         const requestingUser = await User.findById(req.user.id);
@@ -69,7 +69,9 @@ exports.addMedicine = async (req, res) => {
             name,
             dosage: dosage || '',
             time,
-            frequency: frequency || 'daily',
+            frequency: frequency || 'Daily',
+            daysOfWeek: daysOfWeek || [],
+            startDate: startDate || Date.now(),
         });
 
         const medicine = await newMedicine.save();
@@ -99,12 +101,14 @@ exports.updateMedicine = async (req, res) => {
             return res.status(401).json({ msg: 'Not authorized' });
         }
 
-        const { name, dosage, time, frequency, status } = req.body;
+        const { name, dosage, time, frequency, daysOfWeek, startDate, status } = req.body;
         const updateFields = {};
         if (name) updateFields.name = name;
         if (dosage !== undefined) updateFields.dosage = dosage;
         if (time) updateFields.time = time;
         if (frequency) updateFields.frequency = frequency;
+        if (daysOfWeek !== undefined) updateFields.daysOfWeek = daysOfWeek;
+        if (startDate) updateFields.startDate = startDate;
         if (status) updateFields.status = status;
 
         medicine = await Medicine.findByIdAndUpdate(

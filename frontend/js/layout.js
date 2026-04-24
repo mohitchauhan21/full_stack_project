@@ -26,12 +26,12 @@ const renderSidebar = () => {
     const sidebarHTML = `
         <div class="sidebar">
             <div class="mb-12 px-4">
-                <div class="flex items-center gap-3">
+                <a href="/dashboard.html" class="flex items-center gap-3 hover:opacity-80 transition-opacity">
                     <div class="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-white shadow-lg shadow-primary/20">
                         <i data-lucide="activity" class="w-6 h-6"></i>
                     </div>
                     <h1 class="text-2xl font-display font-bold text-slate-800 tracking-tight">MedRemind</h1>
-                </div>
+                </a>
             </div>
 
             <nav class="flex flex-col gap-2">
@@ -44,11 +44,6 @@ const renderSidebar = () => {
             </nav>
 
             <div class="mt-auto px-4">
-                <div class="p-6 bg-slate-50 rounded-3xl border border-slate-100 mb-6">
-                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Help Center</p>
-                    <p class="text-xs text-slate-600 font-medium mb-4">Having trouble with your schedule?</p>
-                    <button class="w-full py-3 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-700 hover:bg-slate-50 transition-all">Get Support</button>
-                </div>
                 
                 <button id="global-logout" class="w-full flex items-center justify-center gap-3 py-4 text-slate-500 hover:text-danger hover:bg-rose-50 rounded-2xl transition-all text-sm font-bold">
                     <i data-lucide="log-out" class="w-5 h-5"></i>
@@ -87,12 +82,7 @@ const renderSidebar = () => {
             </div>
             
             <div class="flex items-center gap-6">
-                <button class="w-12 h-12 flex items-center justify-center bg-white border border-slate-100 rounded-2xl text-slate-400 hover:text-primary hover:border-primary/20 transition-all relative">
-                    <i data-lucide="bell" class="w-6 h-6"></i>
-                    <span class="absolute top-3 right-3 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white"></span>
-                </button>
-                <div class="h-10 w-[1px] bg-slate-100"></div>
-                <div class="flex items-center gap-4">
+                <a href="/profile.html" class="flex items-center gap-4 hover:opacity-80 transition-opacity">
                     <div class="text-right hidden sm:block">
                         <p class="text-sm font-bold text-slate-800">${user.name}</p>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest">${user.role}</p>
@@ -100,7 +90,7 @@ const renderSidebar = () => {
                     <div class="w-12 h-12 rounded-2xl bg-white border-2 border-white shadow-md overflow-hidden hover:scale-105 transition-all cursor-pointer">
                         <img src="https://api.dicebear.com/7.x/avataaars/svg?seed=${user.name}" class="w-full h-full object-cover">
                     </div>
-                </div>
+                </a>
             </div>
         </header>
     `;

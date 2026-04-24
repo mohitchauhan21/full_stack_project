@@ -73,12 +73,48 @@
 
                         <div>
                             <label class="block text-xs font-bold text-slate-400 uppercase mb-2 ml-1">Frequency</label>
-                            <select id="med-frequency" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
+                            <select id="med-frequency" onchange="toggleDayPicker()" class="w-full px-5 py-4 bg-slate-50 border border-slate-100 rounded-2xl outline-none focus:ring-2 focus:ring-primary/20 transition-all text-base font-medium">
                                 <option value="Daily">Daily</option>
                                 <option value="Twice Daily">Twice Daily</option>
+                                <option value="Every Other Day">Every Other Day</option>
                                 <option value="Weekly">Weekly</option>
                                 <option value="As Needed">As Needed</option>
                             </select>
+                        </div>
+
+                        <!-- Day of week picker (shown only for Weekly) -->
+                        <div id="day-picker-container" class="hidden">
+                            <label class="block text-xs font-bold text-slate-400 uppercase mb-3 ml-1">Days of the Week</label>
+                            <div class="flex gap-2 flex-wrap">
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="0" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Sun</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="1" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Mon</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="2" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Tue</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="3" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Wed</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="4" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Thu</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="5" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Fri</span>
+                                </label>
+                                <label class="cursor-pointer">
+                                    <input type="checkbox" name="day-of-week" value="6" class="peer hidden">
+                                    <span class="inline-flex items-center justify-center w-11 h-11 rounded-xl text-xs font-bold border border-slate-100 bg-slate-50 text-slate-400 peer-checked:bg-primary peer-checked:text-white peer-checked:border-primary transition-all select-none">Sat</span>
+                                </label>
+                            </div>
                         </div>
 
                         <!-- Status — only shown in edit mode -->

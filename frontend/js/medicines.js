@@ -61,6 +61,20 @@ window.setFilter = function(filter) {
     loadMedicines();
 };
 
+// ─── Toggle day-of-week picker based on frequency ─────────────────────────────
+window.toggleDayPicker = function() {
+    const freq = document.getElementById('med-frequency')?.value;
+    const picker = document.getElementById('day-picker-container');
+    if (!picker) return;
+    if (freq === 'Weekly') {
+        picker.classList.remove('hidden');
+    } else {
+        picker.classList.add('hidden');
+        // Uncheck all days when hidden
+        picker.querySelectorAll('input[name="day-of-week"]').forEach(cb => cb.checked = false);
+    }
+};
+
 // ─── READ: Load medicine list ─────────────────────────────────────────────────
 async function loadMedicines() {
     if (!medicineList) return;
@@ -202,6 +216,14 @@ window.editMedicine = async function(id) {
         document.getElementById('med-time').value       = to24h(med.time);
         document.getElementById('med-frequency').value  = med.frequency || 'Daily';
 
+        // Show/hide day picker and restore checked days
+        toggleDayPicker();
+        if (med.frequency === 'Weekly' && Array.isArray(med.daysOfWeek)) {
+            document.querySelectorAll('input[name="day-of-week"]').forEach(cb => {
+                cb.checked = med.daysOfWeek.includes(parseInt(cb.value));
+            });
+        }
+
         // Show status field in edit mode
         const statusContainer = document.getElementById('status-container');
         statusContainer.classList.remove('hidden');
@@ -234,6 +256,12 @@ window.cancelEdit = function() {
     document.getElementById('edit-med-id').value = '';
     document.getElementById('status-container').classList.add('hidden');
     document.getElementById('cancel-edit-btn').classList.add('hidden');
+    // Hide and reset day picker
+    const picker = document.getElementById('day-picker-container');
+    if (picker) {
+        picker.classList.add('hidden');
+        picker.querySelectorAll('input[name="day-of-week"]').forEach(cb => cb.checked = false);
+    }
 
     document.getElementById('form-title').textContent = 'Add Medication';
     document.getElementById('form-icon').className = 'w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center text-primary';
@@ -257,8 +285,17 @@ async function handleFormSubmit(e) {
     const frequency = document.getElementById('med-frequency')?.value || 'Daily';
     const status    = document.getElementById('med-status')?.value || 'active';
 
+    // Collect selected days of week (for Weekly)
+    const daysOfWeek = Array.from(
+        document.querySelectorAll('input[name="day-of-week"]:checked')
+    ).map(cb => parseInt(cb.value));
+
     if (!name || !rawTime) {
         showFormError('Please fill in Medication Name and Time.');
+        return;
+    }
+    if (frequency === 'Weekly' && daysOfWeek.length === 0) {
+        showFormError('Please select at least one day for Weekly frequency.');
         return;
     }
     if (user.role === 'doctor' && !editingId && !patientId) {
@@ -277,16 +314,18 @@ async function handleFormSubmit(e) {
             // ── UPDATE ──
             await apiFetch(`/medicines/${editingId}`, {
                 method: 'PUT',
-                body: JSON.stringify({ name, time, dosage, frequency, status })
+                body: JSON.stringify({ name, time, dosage, frequency, daysOfWeek, status })
             });
             showFormSuccess('Medication updated successfully!');
             cancelEdit();
         } else {
             // ── CREATE ──
-            const data = { name, time, dosage, frequency };
+            const data = { name, time, dosage, frequency, daysOfWeek, startDate: new Date().toISOString() };
             if (user.role === 'doctor' && patientId) data.user = patientId;
             await apiFetch('/medicines', { method: 'POST', body: JSON.stringify(data) });
             addMedForm.reset();
+            // Reset day picker after form reset
+            toggleDayPicker();
             showFormSuccess('Medication scheduled successfully!');
         }
         loadMedicines();
